@@ -2,13 +2,25 @@ export default {
     async fetch(request, env) {
       const url = new URL(request.url);
   
-      // Proxy requests starting with "/zephr"
       if (url.pathname.startsWith('/zephr')) {
-        url.hostname = 'https://alm-dev-nuxt-edge-demo-live.zephrcf.com/'; // Replace with Zephr CDN
-        return fetch(url.toString(), request);
+        url.hostname = 'alm-dev-nuxt-edge-demo-live.zephrcf.com';
+        url.protocol = 'https'; // Ensure the protocol is correct
+  
+        const newRequest = new Request(url.toString(), {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+          redirect: 'follow',
+        });
+  
+        const response = await fetch(newRequest);
+        const newResponse = new Response(response.body, response);
+        newResponse.headers.set('Access-Control-Allow-Origin', '*'); // Enable CORS
+  
+        return newResponse;
       }
   
-      // Let all other requests go to your Nuxt app
+      // Fallback to Nuxt app
       return env.ASSETS.fetch(request);
     },
   };
