@@ -1,23 +1,21 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  // Nuxt modules
   modules: [
     '@nuxthub/core',
     '@nuxt/eslint',
+    '@nuxt/content',
   ],
 
-  // Devtools and environment configuration
+  // Enable devtools
   devtools: { enabled: true },
+
   runtimeConfig: {
     public: {
-      helloText: 'Hello from the Edge 👋', // Public environment variable
+      helloText: 'Hello from the Edge 👋',
     },
   },
+
   future: { compatibilityVersion: 4 },
   compatibilityDate: '2024-07-30',
-
-  // Hub configuration
-  hub: {},
 
   eslint: {
     config: {
@@ -27,10 +25,19 @@ export default defineNuxtConfig({
     },
   },
 
-  // Nitro configuration (correct usage of `routeRules`)
+  hub: {},
+
+  content: {
+    // Markdown settings for Nuxt Content
+    markdown: {
+      remarkPlugins: ['remark-math'],
+      rehypePlugins: ['rehype-highlight'],
+    },
+  },
+
   nitro: {
     routeRules: {
-      '/protected/**': { headers: { 'cache-control': 'no-cache' } }, // Ensure secure cache rules
+      '/protected/**': { headers: { 'cache-control': 'no-cache' } },
     },
   },
 });
