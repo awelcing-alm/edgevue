@@ -1,49 +1,16 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxthub/core',
-    '@nuxt/eslint',
-    '@nuxt/content',
-    '@nuxthq/studio',
-  ],
-
-  // Enable devtools
+  compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-
-  runtimeConfig: {
-    public: {
-      helloText: 'Hello from the Edge 👋',
-    },
-  },
-
-  future: { compatibilityVersion: 4 },
-  compatibilityDate: '2024-07-30',
-
-  eslint: {
-    config: {
-      stylistic: {
-        quotes: 'single',
-      },
-    },
-  },
-
-  hub: {},
-
+  modules: [
+    '@nuxt/content',
+    '@nuxtjs/tailwindcss'
+  ],
   content: {
-    // Markdown settings for Nuxt Content
-    markdown: {
-      remarkPlugins: ['remark-math'],
-      rehypePlugins: ['rehype-highlight'],
-    },
-  },
-
-    // Enable Nuxt Studio preview URL (if required)
-    studio: {
-      enabled: true,  // Automatically enable studio mode
-    },
-
-  nitro: {
-    routeRules: {
-      '/protected/**': { headers: { 'cache-control': 'no-cache' } },
-    },
-  },
-});
+    // Enable content writing in Nuxt Studio
+    documentDriven: true,
+    highlight: {
+      theme: 'github-light'
+    }
+  }
+})
