@@ -34,6 +34,14 @@ export default defineNuxtConfig({
     },
   },
 
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
+  },
+
   // Nitro configuration (correct usage of `routeRules`)
   nitro: {
     routeRules: {
