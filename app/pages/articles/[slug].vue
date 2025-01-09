@@ -1,25 +1,24 @@
 <template>
   <div>
-    <TopNav />
-    <article>
-      <h1>{{ article.title }}</h1>
-      <p class="text-sm text-gray-500">{{ article.date }} - {{ article.author }}</p>
-      <div v-html="article.body" />
-    </article>
+    <h1>{{ article.title }}</h1>
+    <div v-html="article.body" />
   </div>
 </template>
 
 <script setup>
-import { useContent } from '@nuxt/content'
-import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router';
 
-const route = useRoute()
-const { data: article } = await useContent(`/lizards/${route.params.slug}`).fetch()
+// Get the article slug from the route
+const route = useRoute();
+const slug = route.params.slug;
+
+// Fetch the article using the `useContent` composable
+const { data: article } = await useContent(`/articles/${slug}`).fetch();
 </script>
 
 <style scoped>
-article {
-  padding: 16px;
-  line-height: 1.6;
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 </style>

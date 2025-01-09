@@ -3,6 +3,7 @@ export default defineNuxtConfig({
     '@nuxthub/core',
     '@nuxt/eslint',
     '@nuxt/content',
+    '@nuxthq/studio',
   ],
 
   // Enable devtools
@@ -34,6 +35,11 @@ export default defineNuxtConfig({
       rehypePlugins: ['rehype-highlight'],
     },
   },
+
+    // Enable Nuxt Studio preview URL (if required)
+    studio: {
+      enabled: true,  // Automatically enable studio mode
+    },
 
   nitro: {
     routeRules: {
