@@ -62,7 +62,7 @@
       <!-- Salamander Collection -->
       <div class="bg-blue-800 text-blue-50 p-8 rounded-lg">
         <div class="flex items-center gap-4 mb-4">
-          <span class="text-4xl">🦎</span>
+          <span class="text-4xl">🐊</span>
           <h2 class="text-2xl font-bold">Salamander Collection</h2>
         </div>
         <ContentList path="/salamanders">
