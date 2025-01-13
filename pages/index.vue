@@ -11,7 +11,7 @@
           <SectionCard
             title="Lizard Collection"
             icon="🦎"
-            path="/lizards"
+            path="/category/lizards"
             bgColor="bg-emerald-800"
             cardBgColor="bg-emerald-700"
             hoverColor="hover:bg-emerald-600"
@@ -22,7 +22,7 @@
           <SectionCard
             title="Snake Collection"
             icon="🐍"
-            path="/snakes"
+            path="/category/snakes"
             bgColor="bg-amber-700"
             cardBgColor="bg-amber-600"
             hoverColor="hover:bg-amber-500"
@@ -33,7 +33,7 @@
           <SectionCard
             title="Salamander Collection"
             icon="🐊"
-            path="/salamanders"
+            path="/category/salamanders"
             bgColor="bg-blue-800"
             cardBgColor="bg-blue-700"
             hoverColor="hover:bg-blue-600"
