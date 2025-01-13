@@ -27,6 +27,8 @@ onMounted(() => {
 </script>
 
 <template>
+    <NuxtLayout name="default">
+      <template #default>
   <article class="max-w-4xl mx-auto">
     <ContentDoc v-slot="{ doc }">
       <template v-if="doc">
@@ -52,4 +54,5 @@ onMounted(() => {
       </template>
     </ContentDoc>
   </article>
+</NuxtLayout>
 </template>
