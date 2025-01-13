@@ -15,7 +15,7 @@
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
 
         <!-- Register / Sign In Button -->
-        <button @click="openRegistration" class="nav-link register-button">
+        <button @click="openRegistration" class="nav-link">
           {{ isAuthenticated ? 'Sign Out' : 'Register / Sign In' }}
         </button>
       </div>
