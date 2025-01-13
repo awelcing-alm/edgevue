@@ -9,6 +9,7 @@
           </NuxtLink>
           <NuxtLink to="/stats" class="hover:text-emerald-200 transition">Statistics</NuxtLink>
         </div>
+        <!-- Register Button -->
         <button @click="openRegistration" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg">
           Register
         </button>
@@ -23,11 +24,28 @@
       </p>
     </footer>
     <CookieConsent />
+
+    <!-- Registration Modal -->
+    <RegistrationModal v-if="showModal" @close="closeRegistration" />
   </div>
 </template>
 
 <script setup>
 import CookieConsent from '~/components/CookieConsent.vue';
+import RegistrationModal from '~/components/RegistrationModal.vue'; // Import the modal
+
+import { ref } from 'vue'; // Import ref for state
+
+const showModal = ref(false); // State to control modal visibility
+
+// Open and close modal functions
+function openRegistration() {
+  showModal.value = true;
+}
+
+function closeRegistration() {
+  showModal.value = false;
+}
 
 function openCookieSettings() {
   const cookieConsentComponent = document.querySelector('cookie-consent');
