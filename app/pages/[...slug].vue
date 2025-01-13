@@ -1,35 +1,29 @@
 <script setup lang="ts">
-import { onMounted, watchEffect, ref } from 'vue';
+import { onMounted, watchEffect } from 'vue';
 
-const zephrInitialized = ref(false);
+// Track related article clicks
+function trackRelatedClick(article: any) {
+  window.gtag?.('event', 'related_article_click', {
+    event_category: 'Related Articles',
+    event_label: article.title,
+    destination_path: article._path,
+  });
+}
 
+// Handle Zephr initialization
 onMounted(() => {
-  const checkZephrInit = setInterval(() => {
-    if (window.zephrBrowser) {
-      window.zephrBrowser.run({
-        jwt: 'YOUR_JWT_TOKEN',
-        customData: { 'article-type': 'premium' },
-      });
-      zephrInitialized.value = true;
-      clearInterval(checkZephrInit);
-    }
-  }, 500);
-});
-
-watchEffect(() => {
-  if (zephrInitialized.value) {
-    const zephrContent = document.querySelector('.zephr-content');
-    if (zephrContent) {
-      window.gtag?.('event', 'view_premium_content', {
-        content_type: zephrContent.getAttribute('data-zephr-content'),
-        event_label: 'Protected Article',
-      });
-    }
+  const zephrContent = document.querySelector('.zephr-content');
+  if (zephrContent) {
+    window.gtag?.('event', 'view_premium_content', {
+      content_type: zephrContent.getAttribute('data-zephr-content'),
+      event_label: 'Protected Article',
+    });
   }
 });
 
+// Watch for changes in the `doc` prop to send page view events
 watchEffect(() => {
-  if (doc?.title) {
+  if (typeof doc !== 'undefined' && doc?.title) {
     window.gtag?.('event', 'page_view', {
       page_title: doc.title,
       page_path: doc._path,
@@ -75,13 +69,3 @@ watchEffect(() => {
     </ContentDoc>
   </article>
 </template>
-
-<script>
-function trackRelatedClick(article) {
-  window.gtag?.('event', 'related_article_click', {
-    event_category: 'Related Articles',
-    event_label: article.title,
-    destination_path: article._path,
-  });
-}
-</script>
