@@ -9,6 +9,9 @@
           </NuxtLink>
           <NuxtLink to="/stats" class="hover:text-emerald-200 transition">Statistics</NuxtLink>
         </div>
+        <button @click="openRegistration" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg">
+          Register
+        </button>
       </nav>
     </header>
     <main class="container mx-auto px-4 py-8">
