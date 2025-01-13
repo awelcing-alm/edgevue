@@ -7,14 +7,9 @@
             <span class="text-3xl">🦎</span>
             Newts' News
           </NuxtLink>
-          <NuxtLink to="/stats" class="hover:text-emerald-200 transition">
-            Statistics
-          </NuxtLink>
+          <NuxtLink to="/stats" class="hover:text-emerald-200 transition">Statistics</NuxtLink>
         </div>
-        <button 
-          @click="openRegistration" 
-          class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg transition"
-        >
+        <button @click="openRegistration" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg">
           Register
         </button>
       </nav>
@@ -22,31 +17,20 @@
     <main class="container mx-auto px-4 py-8">
       <NuxtPage />
     </main>
-    <ClientOnly>
-      <div id="zephr-integration"></div>
-    </ClientOnly>
+    <footer class="bg-gray-100 py-4 text-center">
+      <p class="text-sm">
+        <a href="#" @click.prevent="openCookieSettings" class="text-emerald-600 underline">Manage Cookies</a>
+      </p>
+    </footer>
+    <CookieConsent />
   </div>
 </template>
 
 <script setup>
-onMounted(() => {
-  const zephrScript = document.createElement('script');
-  zephrScript.src = 'https://assets.zephr.com/zephr-browser/1.9.1/zephr-browser.umd.js';
-  zephrScript.async = true;
+import CookieConsent from '~/components/CookieConsent.vue';
 
-  zephrScript.onload = () => {
-    window.zephrBrowser.run({
-      jwt: 'YOUR_JWT_TOKEN',
-      customData: { 'article-type': 'premium' },
-    });
-  };
-
-  document.head.appendChild(zephrScript);
-});
-
-function openRegistration() {
-  if (window.zephrBrowser) {
-    window.zephrBrowser.showRegistration();
-  }
+function openCookieSettings() {
+  const cookieConsentComponent = document.querySelector('cookie-consent');
+  cookieConsentComponent?.__vueParentComponent.ctx.openManageModal();
 }
 </script>

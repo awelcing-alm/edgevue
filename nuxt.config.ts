@@ -7,7 +7,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      helloText: 'Hello from the Edge 👋', // Public environment variable
+      gaId: 'G-VPV9PFJ3E4', // Google Analytics 4 ID
+      zephrJwt: 'YOUR_ZEPHR_JWT_TOKEN', // Zephr JWT
     },
   },
   future: { compatibilityVersion: 4 },
@@ -32,9 +33,24 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-      ]
-    }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
+      script: [
+        {
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-VPV9PFJ3E4',
+          async: true,
+        },
+        {
+          children: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VPV9PFJ3E4');
+          `,
+          type: 'text/javascript',
+        },
+      ],
+    },
   },
 
   // Nitro configuration (correct usage of `routeRules`)

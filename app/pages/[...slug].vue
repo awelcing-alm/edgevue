@@ -1,149 +1,76 @@
+<script setup>
+import { onMounted, watchEffect } from 'vue';
+
+onMounted(() => {
+  const zephrContent = document.querySelector('.zephr-content');
+  if (zephrContent) {
+    // Send a custom GA event for premium content display
+    window.gtag('event', 'view_premium_content', {
+      content_type: zephrContent.getAttribute('data-zephr-content'),
+      event_label: 'Protected Article',
+    });
+  }
+});
+
+// Watch for changes in the `doc` prop to log page metadata
+watchEffect(() => {
+  if (doc?.title) {
+    window.gtag('event', 'page_view', {
+      page_title: doc.title,
+      page_path: doc._path,
+      event_category: 'Article Views',
+      content_description: doc.description || '',
+      published_date: doc.date || '',
+    });
+  }
+});
+</script>
+
 <template>
   <article class="max-w-4xl mx-auto">
     <ContentDoc v-slot="{ doc }">
       <template v-if="doc">
-        <!-- Hero Section -->
-        <div
-          class="bg-gradient-to-br from-emerald-800 to-emerald-900 text-emerald-50 p-8 rounded-lg mb-8"
-        >
-          <div v-if="doc.icon" class="text-6xl mb-4">
-            {{ doc.icon }}
-          </div>
+        <div class="bg-gradient-to-br from-emerald-800 to-emerald-900 text-emerald-50 p-8 rounded-lg mb-8">
           <h1 class="text-4xl font-bold mb-4">{{ doc.title }}</h1>
           <p class="text-xl text-emerald-100">{{ doc.description }}</p>
           <div v-if="doc.date" class="mt-4 text-emerald-200">
-            {{
-              new Date(doc.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
-            }}
+            {{ new Date(doc.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
           </div>
         </div>
 
-        <!-- Article Content -->
         <ClientOnly>
-          <div
-            class="zephr-content bg-white shadow-lg rounded-lg p-8"
-            data-zephr-content="premium"
-          >
-            <ContentRenderer
-              :value="doc"
-              class="prose lg:prose-xl prose-emerald prose-headings:text-emerald-900 prose-a:text-emerald-600 prose-strong:text-emerald-700 prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-emerald-500 prose-blockquote:border-l-emerald-500 prose-blockquote:bg-emerald-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-img:rounded-lg prose-img:shadow-md"
-            />
+          <div class="zephr-content bg-white shadow-lg rounded-lg p-8" data-zephr-content="premium">
+            <ContentRenderer :value="doc" />
           </div>
         </ClientOnly>
 
-        <!-- Related Articles -->
+        <!-- Track click events for related articles -->
         <div class="mt-12">
-          <h2 class="text-2xl font-bold text-emerald-900 mb-6">
-            Related Articles
-          </h2>
-          <ContentList
-            :path="doc._dir || '/'"
-            :where="{
-              _path: { $ne: doc._path },
-              _extension: 'md',
-            }"
-            :limit="3"
-          >
+          <h2 class="text-2xl font-bold text-emerald-900 mb-6">Related Articles</h2>
+          <ContentList :path="doc._dir || '/'" :where="{ _path: { $ne: doc._path }, _extension: 'md' }" :limit="3">
             <template #default="{ list }">
               <div class="grid gap-6 md:grid-cols-3">
-                <NuxtLink
-                  v-for="article in list"
-                  :key="article._path"
-                  :to="article._path"
-                  class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition group"
-                >
-                  <div v-if="article.icon" class="text-4xl mb-3">
-                    {{ article.icon }}
-                  </div>
-                  <h3
-                    class="font-semibold text-lg text-emerald-900 group-hover:text-emerald-600 transition"
-                  >
+                <NuxtLink v-for="article in list" :key="article._path" :to="article._path" @click="trackRelatedClick(article)">
+                  <div v-if="article.icon" class="text-4xl mb-3">{{ article.icon }}</div>
+                  <h3 class="font-semibold text-lg text-emerald-900 group-hover:text-emerald-600 transition">
                     {{ article.title }}
                   </h3>
-                  <p class="text-gray-600 mt-2 text-sm">
-                    {{ article.description }}
-                  </p>
                 </NuxtLink>
               </div>
             </template>
-            <template #not-found>
-              <p class="text-gray-600">No related articles found.</p>
-            </template>
-            <template #empty>
-              <p class="text-gray-600">No related articles found.</p>
-            </template>
           </ContentList>
-        </div>
-      </template>
-      <template v-else>
-        <div class="bg-white p-8 rounded-lg shadow-md">
-          <p class="text-gray-600">Article not found.</p>
         </div>
       </template>
     </ContentDoc>
   </article>
 </template>
 
-<script setup>
-import { onMounted } from 'vue';
-
-onMounted(() => {
-  const zephrContent = document.querySelector('.zephr-content');
-  if (zephrContent) {
-    console.log('Applying protected article styles...');
-    zephrContent.classList.add('zephr-protected-article');
-  }
-});
+<script>
+function trackRelatedClick(article) {
+  window.gtag('event', 'related_article_click', {
+    event_category: 'Related Articles',
+    event_label: article.title,
+    destination_path: article._path,
+  });
+}
 </script>
-
-<style scoped lang="postcss">
-/* Base prose styling */
-.prose {
-  max-width: none;
-}
-
-.prose h2 {
-  @apply mt-8 mb-4;
-}
-
-.prose p {
-  @apply mb-4;
-}
-
-.prose ul,
-.prose ol {
-  @apply my-4;
-}
-
-.prose li {
-  @apply mb-2;
-}
-
-.prose blockquote {
-  @apply my-6;
-}
-
-.prose img {
-  @apply my-8;
-}
-
-/* Scoped styling for the zephr-content class */
-.zephr-content {
-  border: 2px solid #065f46; /* Emerald green border */
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  background-color: #f0fdf4; /* Light emerald background */
-}
-
-/* Custom styling for zephr-protected-article */
-.zephr-content.zephr-protected-article {
-  background-color: #fff4e6; /* Light orange for premium articles */
-  border-color: #d97706; /* Amber border for premium articles */
-  color: #92400e; /* Amber text for premium content */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add some shadow for emphasis */
-}
-</style>
