@@ -1,21 +1,36 @@
-<script setup>
-import { onMounted, watchEffect } from 'vue';
+<script setup lang="ts">
+import { onMounted, watchEffect, ref } from 'vue';
+
+const zephrInitialized = ref(false);
 
 onMounted(() => {
-  const zephrContent = document.querySelector('.zephr-content');
-  if (zephrContent) {
-    // Send a custom GA event for premium content display
-    window.gtag('event', 'view_premium_content', {
-      content_type: zephrContent.getAttribute('data-zephr-content'),
-      event_label: 'Protected Article',
-    });
+  const checkZephrInit = setInterval(() => {
+    if (window.zephrBrowser) {
+      window.zephrBrowser.run({
+        jwt: 'YOUR_JWT_TOKEN',
+        customData: { 'article-type': 'premium' },
+      });
+      zephrInitialized.value = true;
+      clearInterval(checkZephrInit);
+    }
+  }, 500);
+});
+
+watchEffect(() => {
+  if (zephrInitialized.value) {
+    const zephrContent = document.querySelector('.zephr-content');
+    if (zephrContent) {
+      window.gtag?.('event', 'view_premium_content', {
+        content_type: zephrContent.getAttribute('data-zephr-content'),
+        event_label: 'Protected Article',
+      });
+    }
   }
 });
 
-// Watch for changes in the `doc` prop to log page metadata
 watchEffect(() => {
   if (doc?.title) {
-    window.gtag('event', 'page_view', {
+    window.gtag?.('event', 'page_view', {
       page_title: doc.title,
       page_path: doc._path,
       event_category: 'Article Views',
@@ -44,17 +59,13 @@ watchEffect(() => {
           </div>
         </ClientOnly>
 
-        <!-- Track click events for related articles -->
         <div class="mt-12">
           <h2 class="text-2xl font-bold text-emerald-900 mb-6">Related Articles</h2>
           <ContentList :path="doc._dir || '/'" :where="{ _path: { $ne: doc._path }, _extension: 'md' }" :limit="3">
             <template #default="{ list }">
               <div class="grid gap-6 md:grid-cols-3">
                 <NuxtLink v-for="article in list" :key="article._path" :to="article._path" @click="trackRelatedClick(article)">
-                  <div v-if="article.icon" class="text-4xl mb-3">{{ article.icon }}</div>
-                  <h3 class="font-semibold text-lg text-emerald-900 group-hover:text-emerald-600 transition">
-                    {{ article.title }}
-                  </h3>
+                  <h3 class="font-semibold text-lg text-emerald-900 group-hover:text-emerald-600">{{ article.title }}</h3>
                 </NuxtLink>
               </div>
             </template>
@@ -67,7 +78,7 @@ watchEffect(() => {
 
 <script>
 function trackRelatedClick(article) {
-  window.gtag('event', 'related_article_click', {
+  window.gtag?.('event', 'related_article_click', {
     event_category: 'Related Articles',
     event_label: article.title,
     destination_path: article._path,
