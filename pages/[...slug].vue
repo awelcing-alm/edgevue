@@ -1,43 +1,48 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 
 const isAuthenticated = ref(false);
-const showModal = ref(false); // State to show the registration modal
+const showModal = ref(false);
+const router = useRouter();
 
-// Function to handle opening the registration modal
+// Function to handle registration modal
 function openRegistration() {
-  showModal.value = true; // Open the modal
+  showModal.value = true;
 }
 
-// Function to close the registration modal
 function closeRegistration() {
-  showModal.value = false; // Close the modal
+  showModal.value = false;
 }
 
-// Function to run Zephr authentication check
-function checkZephrAuth() {
+// Function to check Zephr authentication
+async function checkZephrAuth() {
   const zephrContent = document.querySelector('.zephr-content');
+
   if (zephrContent) {
-    zephrBrowser.run({
+    if (!window.zephrBrowser) {
+      console.warn('Zephr library not loaded.');
+      return;
+    }
+
+    await window.zephrBrowser.run({
       customData: { 'content-type': 'premium' },
-      onSuccess: () => {
+      onSuccess: async () => {
         isAuthenticated.value = true; // User is authenticated
-        window.gtag('event', 'view_premium_content', {
-          content_type: zephrContent.getAttribute('data-zephr-content'),
-          event_label: 'Protected Article',
-        });
+        console.log('User authenticated via Zephr.');
+        await nextTick(); // Ensure the DOM updates before rendering
       },
       onFailure: () => {
-        isAuthenticated.value = false; // User not authenticated, open registration button
-        const modalButton = document.querySelector('.register-button');
-        if (modalButton) modalButton.click(); // Trigger modal open through button
+        isAuthenticated.value = false; // User not authenticated
+        console.warn('User not authenticated.');
+        openRegistration(); // Open the modal
       },
     });
   }
 }
 
-// Run Zephr authentication check when component is mounted
 onMounted(() => {
+  // Ensure the page runs authentication check on load
   checkZephrAuth();
 });
 </script>
@@ -56,9 +61,9 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Premium Content Section -->
+            <!-- Premium Content -->
             <ClientOnly>
-              <div v-if="isAuthenticated" class="zephr-content bg-white shadow-lg rounded-lg p-8" data-zephr-content="premium">
+              <div v-if="isAuthenticated" class="zephr-content bg-white shadow-lg rounded-lg p-8" data-zephr-content="premium" :key="isAuthenticated">
                 <ContentRenderer :value="doc" />
               </div>
               <div v-else class="text-center text-red-600 py-12">
