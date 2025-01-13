@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      gaId: 'G-VPV9PFJ3E4', // Google Analytics 4 ID
+      gaId: 'G-HDP4C20H65', // Google Analytics 4 ID
       zephrJwt: 'YOUR_ZEPHR_JWT_TOKEN', // Zephr JWT
     },
   },
@@ -37,7 +37,7 @@ export default defineNuxtConfig({
       ],
       script: [
         {
-          src: 'https://www.googletagmanager.com/gtag/js?id=G-VPV9PFJ3E4',
+          src: 'https://www.googletagmanager.com/gtag/js?id=G-HDP4C20H65',
           async: true,
         },
         {
@@ -45,7 +45,7 @@ export default defineNuxtConfig({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-VPV9PFJ3E4');
+            gtag('config', 'G-HDP4C20H65');
           `,
           type: 'text/javascript',
         },

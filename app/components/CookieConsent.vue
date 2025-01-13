@@ -83,7 +83,7 @@
   
   function loadGA4() {
     const script = document.createElement('script');
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VPV9PFJ3E4';
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-HDP4C20H65';
     script.async = true;
     document.head.appendChild(script);
   
@@ -92,7 +92,7 @@
       window.dataLayer.push(arguments);
     };
     window.gtag('js', new Date());
-    window.gtag('config', 'G-VPV9PFJ3E4');
+    window.gtag('config', 'G-HDP4C20H65');
   }
   
   function openManageModal() {
