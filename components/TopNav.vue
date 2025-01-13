@@ -5,14 +5,47 @@
         <NuxtLink to="/">🦎 Wildlife News</NuxtLink>
       </div>
       <div class="nav-links">
-        <NuxtLink class="nav-link" to="/" exact>Home</NuxtLink>
         <NuxtLink class="nav-link" to="/category/lizards">Lizards</NuxtLink>
         <NuxtLink class="nav-link" to="/category/snakes">Snakes</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">Salamanders</NuxtLink>
       </div>
+
+      <!-- Register / Sign In Button -->
+      <div class="flex items-center">
+        <button
+          class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-white font-semibold register-button"
+          @click="openRegistration"
+        >
+          {{ isSignedIn ? 'Sign Out' : 'Register / Sign In' }}
+        </button>
+      </div>
     </div>
+
+    <!-- Registration Modal -->
+    <RegistrationModal v-if="showModal" @close="closeRegistration" />
   </nav>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router'; // For detecting the current route
+import RegistrationModal from '~/components/RegistrationModal.vue'; // Import modal
+
+// State to track signed-in status
+const isSignedIn = ref(false); // Change this logic as needed when integrating auth
+
+// Modal control
+const showModal = ref(false);
+
+// Functions to open and close the modal
+function openRegistration() {
+  showModal.value = true;
+}
+
+function closeRegistration() {
+  showModal.value = false;
+}
+</script>
 
 <style scoped>
 /* Navigation Container */

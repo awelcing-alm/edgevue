@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, watchEffect } from 'vue';
-import RegistrationModal from '~/components/RegistrationModal.vue';
 
 const isAuthenticated = ref(false);
 const showModal = ref(false);
@@ -11,15 +10,16 @@ onMounted(() => {
     zephrBrowser.run({
       customData: { "content-type": "premium" },
       onSuccess: () => {
-        isAuthenticated.value = true;
+        isAuthenticated.value = true; // User is authenticated
         window.gtag('event', 'view_premium_content', {
           content_type: zephrContent.getAttribute('data-zephr-content'),
           event_label: 'Protected Article',
         });
       },
       onFailure: () => {
-        isAuthenticated.value = false;
-        showModal.value = true; // Open the placeholder modal for registration
+        isAuthenticated.value = false; // Open the registration modal
+        const modalButton = document.querySelector('.register-button');
+        if (modalButton) modalButton.click(); // Trigger modal from layout
       },
     });
   }
@@ -44,14 +44,11 @@ onMounted(() => {
           </div>
           <div v-else class="text-center text-red-600 py-12">
             <p>Please register to view this premium content.</p>
-            <button class="bg-emerald-700 text-white px-6 py-2 rounded-lg mt-4 hover:bg-emerald-800" @click="showModal = true">
+            <button class="register-button bg-emerald-700 text-white px-6 py-2 rounded-lg mt-4 hover:bg-emerald-800" @click="$emit('openRegistration')">
               Register / Log In
             </button>
           </div>
         </ClientOnly>
-
-        <!-- Registration placeholder modal -->
-        <RegistrationModal v-if="showModal" />
       </template>
     </ContentDoc>
   </article>
