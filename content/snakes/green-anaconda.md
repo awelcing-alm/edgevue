@@ -1,9 +1,15 @@
 ---
-title: The Green Anaconda - The World's Heaviest Snake
-description: A deep dive into the colossal green anaconda, a reptilian titan of the Amazon.
-icon: 🐍
-date: 2025-01-09
+title: "The Green Anaconda - The World's Heaviest Snake"
+description: "A deep dive into the colossal green anaconda, a reptilian titan of the Amazon."
+icon: "🐍"
+date: "2025-01-09"
+tags:
+  - snakes
+  - green anaconda
+  - reptiles
+  - Amazon rainforest
 ---
+
 
 # The Green Anaconda: The Titan of the Snake World
 

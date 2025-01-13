@@ -1,8 +1,12 @@
 ---
-title: Salamanders vs. Lizards: What’s the Difference?
-description: A breakdown of why salamanders and lizards aren’t the same, despite their similar appearance.
-icon: 🦎
-date: 2025-01-09
+title: "Salamanders vs. Lizards: What's the Difference?"
+description: "A breakdown of why salamanders and lizards aren’t the same, despite their similar appearance."
+icon: "🦎"
+date: "2025-01-09"
+tags:
+  - salamanders
+  - lizards
+  - herpetology
 ---
 
 # Salamanders vs. Lizards: Why They’re Completely Different Animals

@@ -1,8 +1,14 @@
 ---
-title: Poisonous Lizards: Separating Fact from Fiction
-description: A deep dive into the fascinating world of poisonous and venomous lizards.
-icon: 🦎
-date: 2025-01-09
+title: "Poisonous Lizards: Separating Fact from Fiction"
+description: "A deep dive into the fascinating world of poisonous and venomous lizards."
+author: "Newt"
+date: "2025-01-09"
+tags:
+  - lizards
+  - venomous
+  - reptiles
+  - Gila monster
+icon: "🦎"
 ---
 
 # Poisonous Lizards: Fact or Fiction?

@@ -88,7 +88,20 @@
   </article>
 </template>
 
-<style>
+<script setup>
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  const zephrContent = document.querySelector('.zephr-content');
+  if (zephrContent) {
+    console.log('Applying protected article styles...');
+    zephrContent.classList.add('zephr-protected-article');
+  }
+});
+</script>
+
+<style scoped lang="postcss">
+/* Base prose styling */
 .prose {
   max-width: none;
 }
@@ -116,5 +129,21 @@
 
 .prose img {
   @apply my-8;
+}
+
+/* Scoped styling for the zephr-content class */
+.zephr-content {
+  border: 2px solid #065f46; /* Emerald green border */
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #f0fdf4; /* Light emerald background */
+}
+
+/* Custom styling for zephr-protected-article */
+.zephr-content.zephr-protected-article {
+  background-color: #fff4e6; /* Light orange for premium articles */
+  border-color: #d97706; /* Amber border for premium articles */
+  color: #92400e; /* Amber text for premium content */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Add some shadow for emphasis */
 }
 </style>
