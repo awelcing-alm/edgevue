@@ -10,9 +10,17 @@
         <NuxtLink class="nav-link" to="/category/snakes">Snakes</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">Salamanders</NuxtLink>
       </div>
+      <div>
+        <!-- User Authentication Button -->
+        <UserAuthButton />
+      </div>
     </div>
   </nav>
 </template>
+
+<script setup>
+import UserAuthButton from '~/components/UserAuthButton.vue';
+</script>
 
 <style scoped>
 /* Navigation Container */
