@@ -1,12 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   // Nuxt modules
-  modules: [
-    '@nuxthub/core',
-    '@nuxt/eslint',
-    '@nuxt/content',
-    '@nuxtjs/tailwindcss'
-  ],
+  modules: ['@nuxthub/core', '@nuxt/eslint', '@nuxt/content', '@nuxtjs/tailwindcss', '@nuxthq/studio'],
 
   // Devtools and environment configuration
   devtools: { enabled: true },
