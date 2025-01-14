@@ -3,10 +3,6 @@
     <div class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
       <p v-if="isLoading" class="text-gray-500">Loading article...</p>
 
-      <div v-else-if="isBlocked" class="text-red-500">
-        <p>This content is available to premium users. Please <a href="/Register" class="underline text-emerald-600">sign in</a>.</p>
-      </div>
-
       <article v-else>
         <ContentRenderer v-if="doc?.body" :value="doc.body" />
         <p v-else class="text-gray-500">No content found.</p>
