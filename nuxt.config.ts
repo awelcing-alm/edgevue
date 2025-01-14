@@ -9,6 +9,13 @@ export default defineNuxtConfig({
     '@nuxthq/studio',
   ],
 
+  // Plugins
+  plugins: [
+    '~/plugins/ga.client.ts', // Google Analytics client-side plugin
+    '~/plugins/zephr-script.ts', // Zephr script plugin
+    '~/plugins/zephr.client.ts', // Zephr client-side plugin
+  ],
+
   // Enable component and auto-imports globally
   components: true,
   imports: {
