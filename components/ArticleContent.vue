@@ -2,10 +2,13 @@
   <ClientOnly>
     <div class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
       <p v-if="isLoading" class="text-gray-500">Loading article...</p>
-      <div v-else-if="isBlocked" class="text-red-500">Please sign in to view this content.</div>
-      <article v-else v-if="doc.body">
-        <!-- Render Article Content -->
-        <ContentRenderer :value="doc.body">
+
+      <div v-else-if="isBlocked" class="text-red-500">
+        <p>This content is available to premium users. Please <a href="/Register" class="underline text-emerald-600">sign in</a>.</p>
+      </div>
+
+      <article v-else>
+        <ContentRenderer v-if="doc?.body" :value="doc.body">
           <template #default="{ value }">
             <div v-for="(node, index) in value.children" :key="index" class="mb-4">
               <component
@@ -43,43 +46,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineProps } from 'vue';
+import { ref, onMounted } from 'vue';
 
 interface ContentDocument {
   body?: {
     children: Array<Record<string, any>>;
   };
-  [key: string]: any; // Add more fields as needed
+  [key: string]: any;
 }
 
 // Props for the article content document
 defineProps<{ doc: ContentDocument }>();
 
-const isLoading = ref(true); // Controls loading state
-const isBlocked = ref(false); // Controls access state
+const isLoading = ref(true); // Loading state
+const isBlocked = ref(false); // Content blocked state
 
 async function checkZephrDecision() {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     const onZephrReady = () => {
       if (window.Zephr) {
         window.Zephr.run({
           customData: { featureCheck: 'articleContent' },
           onSuccess: () => {
             isBlocked.value = false; // Content is allowed
-            resolve(true);
+            resolve();
           },
           onFailure: () => {
             isBlocked.value = true; // Content is blocked
-            resolve(false);
+            resolve();
           },
         });
       } else {
         console.warn('Zephr not ready');
-        resolve(false);
+        resolve();
       }
     };
 
-    // Listen for Zephr data layer event or timeout
     if (window.Zephr) {
       onZephrReady();
     } else {
