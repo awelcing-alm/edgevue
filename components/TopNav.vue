@@ -13,38 +13,15 @@
         <NuxtLink class="nav-link" to="/category/lizards">LIZARDS</NuxtLink>
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
-
-        <!-- Register / Sign In Button -->
-        <button @click="openRegistration" class="nav-link">
-          {{ isAuthenticated ? 'Sign Out' : 'Register / Sign In' }}
-        </button>
+        <!-- ZephrAuthButton Component -->
+        <ZephrAuthButton />
       </div>
     </div>
-
-    <!-- Registration Modal -->
-    <RegistrationModal :show="showModal" @close="closeRegistration" />
   </nav>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import RegistrationModal from '~/components/RegistrationModal.vue'; // Import modal
-
-// Modal visibility state
-const showModal = ref(false);
-
-// Track authentication state
-const isAuthenticated = ref(false);
-
-// Open modal
-const openRegistration = () => {
-  showModal.value = true;
-};
-
-// Close modal
-const closeRegistration = () => {
-  showModal.value = false;
-};
+import ZephrAuthButton from '~/components/ZephrAuthButton.vue'; // Import the auth button
 </script>
 
 <style scoped>

@@ -20,7 +20,7 @@
   
   <script setup>
   import TopNav from '~/components/TopNav.vue'; // Import TopNav component
-  import RegistrationModal from '~/components/RegistrationModal.vue';
+  import RegistrationModal from '~/components/ZephrAuthButton.vue';
   import { ref } from 'vue';
   
   const showModal = ref(false);
