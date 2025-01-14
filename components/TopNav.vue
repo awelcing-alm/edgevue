@@ -14,16 +14,11 @@
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
       </div>
-      <div class="sign-in-status">
-        <SignInStatus />
-      </div>
     </div>
   </nav>
 </template>
 
-<script setup>
-import SignInStatus from '~/components/SignInStatus.vue'; 
-</script>
+
 
 <style scoped>
 /* Navigation Container */
