@@ -8,37 +8,7 @@
       </div>
 
       <article v-else>
-        <ContentRenderer v-if="doc?.body" :value="doc.body">
-          <template #default="{ value }">
-            <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-              <component
-                :is="node.tag"
-                v-bind="node.props"
-                class="leading-relaxed"
-              >
-                <template v-for="(child, idx) in node.children" :key="idx">
-                  <!-- Render text -->
-                  <span v-if="child.type === 'text'" class="leading-relaxed">{{ child.value }}</span>
-                  
-                  <!-- Render emphasis (bold/italic) -->
-                  <component v-else-if="['strong', 'em', 'code'].includes(child.tag)" :is="child.tag" v-bind="child.props">
-                    <span v-if="child.type === 'text'">{{ child.value }}</span>
-                  </component>
-                  
-                  <!-- Recursively render nested lists and blockquotes -->
-                  <component v-else :is="child.tag" v-bind="child.props">
-                    <template v-for="(innerChild, i) in child.children" :key="i">
-                      <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                      <component v-else :is="innerChild.tag" v-bind="innerChild.props">
-                        <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                      </component>
-                    </template>
-                  </component>
-                </template>
-              </component>
-            </div>
-          </template>
-        </ContentRenderer>
+        <ContentRenderer v-if="doc?.body" :value="doc.body" />
         <p v-else class="text-gray-500">No content found.</p>
       </article>
     </div>
@@ -55,44 +25,39 @@ interface ContentDocument {
   [key: string]: any;
 }
 
-// Props for the article content document
 defineProps<{ doc: ContentDocument }>();
 
-const isLoading = ref(true); // Loading state
-const isBlocked = ref(false); // Content blocked state
+const isLoading = ref(true); // Track loading state
+const isBlocked = ref(false); // Track blocked content
 
-async function checkZephrDecision() {
-  return new Promise<void>((resolve) => {
-    const onZephrReady = () => {
-      if (window.Zephr) {
-        window.Zephr.run({
-          customData: { featureCheck: 'articleContent' },
-          onSuccess: () => {
-            isBlocked.value = false; // Content is allowed
-            resolve();
-          },
-          onFailure: () => {
-            isBlocked.value = true; // Content is blocked
-            resolve();
-          },
-        });
-      } else {
-        console.warn('Zephr not ready');
-        resolve();
-      }
-    };
-
-    if (window.Zephr) {
-      onZephrReady();
-    } else {
-      document.addEventListener('zephr.dataLayerReady', onZephrReady);
-    }
-  });
+function evaluateFeature() {
+  if (window.Zephr && window.Zephr.run) {
+    window.Zephr.run({
+      customData: { featureCheck: 'articleAccess' },
+      onSuccess: () => {
+        const featureOutcome = window.Zephr.outcomes?.['articleContent'];
+        if (featureOutcome?.outcomeLabel === 'allow') {
+          isBlocked.value = false; // Allow the content
+        } else {
+          isBlocked.value = true; // Block the content
+        }
+        isLoading.value = false; // Stop the loading indicator
+      },
+      onFailure: () => {
+        console.warn('Zephr feature decision failed.');
+        isBlocked.value = true; // Default to blocked if there’s a failure
+        isLoading.value = false;
+      },
+    });
+  } else {
+    console.error('Zephr is not loaded. Please check your configuration.');
+    isBlocked.value = true;
+    isLoading.value = false;
+  }
 }
 
-onMounted(async () => {
-  await checkZephrDecision(); // Wait for Zephr decision
-  isLoading.value = false; // Stop showing loading state
+onMounted(() => {
+  evaluateFeature(); // Run Zephr feature check on component mount
 });
 </script>
 
@@ -100,42 +65,33 @@ onMounted(async () => {
 .prose {
   max-width: none;
 }
-
 .prose h1,
 .prose h2,
 .prose h3 {
   @apply text-emerald-900 font-bold;
 }
-
 .prose p {
   @apply leading-relaxed text-gray-700;
 }
-
 .prose ul,
 .prose ol {
   @apply my-4 ml-6 list-disc list-decimal text-gray-700;
 }
-
 .prose li {
   @apply mb-2;
 }
-
 .prose blockquote {
   @apply border-l-4 border-emerald-500 pl-4 bg-emerald-50 italic text-gray-800;
 }
-
 .prose strong {
   @apply text-emerald-900;
 }
-
 .prose em {
   @apply text-emerald-600 italic;
 }
-
 .prose img {
   @apply rounded-lg shadow-md mt-4 mb-4;
 }
-
 .prose hr {
   @apply my-8 border-t-2 border-emerald-100;
 }
