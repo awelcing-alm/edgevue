@@ -26,8 +26,10 @@ export default defineNuxtConfig({
 
   // Content module configuration
   content: {
-    documentDriven: true,
-    highlight: { theme: 'github-light' },
+    documentDriven: true, // Enable parsing full markdown AST
+    markdown: {
+      anchorLinks: true,
+    },
   },
 
   // Nitro configuration for caching and headers
