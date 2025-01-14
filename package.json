@@ -16,6 +16,7 @@
     "@nuxthq/studio": "2.2.1",
     "@nuxthub/core": "^0.8.5",
     "@nuxtjs/tailwindcss": "^6.11.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@unhead/vue": "^1.11.15",
     "chart.js": "^4.4.2",
     "nuxt": "^3.14.0",
