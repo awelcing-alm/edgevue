@@ -21,23 +21,27 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   
   const isSignedIn = ref(false);
   const router = useRouter();
   
   function checkSignInStatus() {
-    const cookies = document.cookie.split('; ').reduce((acc: Record<string, string>, cookie) => {
-      const parts = cookie.split('=');
-      const key = parts[0] ?? ''; // Provide a default empty string if key is undefined
-      const value = parts[1] ?? ''; // Provide a default value for safety
-      if (key) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
-    isSignedIn.value = !!cookies['zephr_session_id']; // True if the Zephr session cookie exists
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie
+        .split('; ')
+        .reduce((acc: Record<string, string>, cookie) => {
+          const parts = cookie.split('=');
+          const key = parts[0] ?? ''; // Default to empty string if undefined
+          const value = parts[1] ?? '';
+          if (key) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {});
+      isSignedIn.value = !!cookies['zephr_session_id']; // True if the Zephr session cookie exists
+    }
   }
   
   function goToRegister() {
@@ -49,7 +53,9 @@
     isSignedIn.value = false;
   }
   
-  checkSignInStatus(); // Run on component load
+  onMounted(() => {
+    checkSignInStatus(); // Run check only after component is mounted (client-side)
+  });
   </script>
   
   <style scoped>
