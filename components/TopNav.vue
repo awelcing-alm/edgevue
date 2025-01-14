@@ -13,16 +13,10 @@
         <NuxtLink class="nav-link" to="/category/lizards">LIZARDS</NuxtLink>
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
-        <!-- ZephrAuthButton Component -->
-        <ZephrAuthButton />
       </div>
     </div>
   </nav>
 </template>
-
-<script setup>
-import ZephrAuthButton from '~/components/ZephrAuthButton.vue'; // Import the auth button
-</script>
 
 <style scoped>
 /* Navigation Container */
