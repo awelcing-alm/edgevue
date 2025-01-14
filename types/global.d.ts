@@ -10,3 +10,23 @@ declare global {
     gtag: (...args: any[]) => void; // For GA4
   }
 }
+
+
+declare global {
+  interface Window {
+    Zephr?: {
+      run: (config?: any) => void;
+      outcomes?: Record<string, any>;
+      accessDetails?: any;
+      includeOutcomes: boolean;
+      outcomesAsEvents: boolean;
+      groupFields: boolean;
+    };
+  }
+}
+
+declare global {
+  interface Window {
+    [key: string]: any; // Dynamic key to store custom dataLayer keys
+  }
+}

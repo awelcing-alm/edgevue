@@ -21,14 +21,14 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
   
   const isSignedIn = ref(false);
   const router = useRouter();
   
   function checkSignInStatus() {
-    if (typeof document !== 'undefined') {
+    if (process.client && typeof document !== 'undefined') {
       const cookies = document.cookie
         .split('; ')
         .reduce((acc: Record<string, string>, cookie) => {
@@ -51,17 +51,68 @@
   function signOut() {
     document.cookie = 'zephr_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     isSignedIn.value = false;
+    triggerZephrRecheck(); // Re-run Zephr to update UI after sign-out
+  }
+  
+  function triggerZephrRecheck() {
+    if (window.Zephr && window.Zephr.run) {
+      console.log('Re-checking Zephr outcomes after logout...');
+      window.Zephr.run();
+    }
   }
   
   onMounted(() => {
-    checkSignInStatus(); // Run check only after component is mounted (client-side)
+    checkSignInStatus();
   });
   </script>
   
-  <style scoped>
-  button {
-    cursor: pointer;
-    text-transform: uppercase;
-  }
-  </style>
+  ---
+  
+  #### **2. Updated `zephr.client.ts` Plugin**
+  
+  - Ensure Zephr is loaded and attached properly after login events.
+  - Handle any potential race conditions where the script loads late.
+  
+  ```ts
+  export default defineNuxtPlugin(() => {
+    const loadZephrScript = () => {
+      return new Promise((resolve, reject) => {
+        if (document.getElementById('zephr-script')) {
+          resolve('Zephr script already loaded.');
+          return;
+        }
+  
+        const zephrScript = document.createElement('script');
+        zephrScript.id = 'zephr-script';
+        zephrScript.src = 'https://assets.zephr.com/zephr-browser/1.9.1/zephr-browser.umd.js';
+        zephrScript.async = true;
+  
+        zephrScript.onload = () => {
+          console.log('Zephr Browser loaded.');
+          resolve(window.Zephr || {});
+        };
+  
+        zephrScript.onerror = () => reject('Failed to load Zephr Browser script.');
+        document.head.appendChild(zephrScript);
+      });
+    };
+  
+    if (process.client) {
+      loadZephrScript()
+        .then(() => {
+          if (!window.Zephr) {
+            console.warn('Zephr browser is not loaded.');
+            return;
+          }
+  
+          window.Zephr.run({
+            jwt: '', // Provide JWT if required
+            customData: { initialLoad: true },
+          });
+        })
+        .catch((error) => {
+          console.error('Error loading Zephr script:', error);
+        });
+    }
+  });
   
