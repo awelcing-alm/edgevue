@@ -7,7 +7,7 @@
       <ContentList :path="path" :where="where">
         <template #default="{ list }">
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <article
+            <div
               v-for="post in list"
               :key="post._path"
               :class="`${cardBgColor} p-6 rounded-lg ${hoverColor} transition`"
@@ -16,7 +16,7 @@
                 <h3 class="text-xl font-semibold mb-2 text-white">{{ post.title }}</h3>
                 <p :class="`${descriptionColor}`">{{ post.description }}</p>
               </NuxtLink>
-            </article>
+            </div>
           </div>
         </template>
         <template #empty>
