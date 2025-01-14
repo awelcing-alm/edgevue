@@ -29,6 +29,9 @@ importers:
       '@unhead/vue':
         specifier: ^1.11.15
         version: 1.11.15(vue@3.5.13(typescript@5.7.3))
+      '@zephr/browser':
+        specifier: ^1.9.1
+        version: 1.9.1
       chart.js:
         specifier: ^4.4.2
         version: 4.4.7
@@ -1535,6 +1538,10 @@ packages:
 
   '@vueuse/shared@11.3.0':
     resolution: {integrity: sha512-P8gSSWQeucH5821ek2mn/ciCk+MS/zoRKqdQIM3bHq6p7GXDAJLmnRRKmF5F65sAVJIfzQlwR3aDzwCn10s8hA==}
+
+  '@zephr/browser@1.9.1':
+    resolution: {integrity: sha512-bLEfBFL4kxJO6fw2bqdO637Vw5MX2cPgrmhS7evgZQoQVsLdEONau5SrqDElwAiwN/R5IW0erMe4r+wqMFuYaQ==}
+    engines: {node: '>=16'}
 
   abbrev@2.0.0:
     resolution: {integrity: sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==}
@@ -6859,6 +6866,8 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+
+  '@zephr/browser@1.9.1': {}
 
   abbrev@2.0.0: {}
 

@@ -15,25 +15,14 @@
         </p>
       </footer>
   
-      <!-- Registration Modal -->
-      <RegistrationModal v-if="showModal" @close="closeRegistration" />
     </div>
   </template>
   
   <script setup>
   import TopNav from '~/components/TopNav.vue'; // Import TopNav component for navigation
-  import RegistrationModal from '~/components/ZephrAuthButton.vue'; // Registration modal
   
   // Modal state
   const showModal = ref(false);
-  
-  function openRegistration() {
-    showModal.value = true;
-  }
-  
-  function closeRegistration() {
-    showModal.value = false;
-  }
   
   function openCookieSettings() {
     const cookieConsentComponent = document.querySelector('cookie-consent');

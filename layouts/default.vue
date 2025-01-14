@@ -12,26 +12,13 @@
           <a href="#" @click.prevent="openCookieSettings" class="text-emerald-600 underline hover:text-emerald-700">Manage Cookies</a>
         </p>
       </footer>
-  
-      <!-- Registration Modal -->
-      <RegistrationModal v-if="showModal" @close="closeRegistration" />
+
     </div>
   </template>
   
   <script setup>
   import TopNav from '~/components/TopNav.vue'; // Import TopNav component
-  import RegistrationModal from '~/components/ZephrAuthButton.vue';
   import { ref } from 'vue';
-  
-  const showModal = ref(false);
-  
-  function openRegistration() {
-    showModal.value = true;
-  }
-  
-  function closeRegistration() {
-    showModal.value = false;
-  }
   
   function openCookieSettings() {
     const cookieConsentComponent = document.querySelector('cookie-consent');
