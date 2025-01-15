@@ -92,71 +92,72 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .article-wrapper {
-  border: 1px solid #e5e7eb;
-  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.loading-placeholder {
-  min-height: 150px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.05);
-  animation: pulse 1.5s infinite;
+.article-wrapper h1,
+.article-wrapper h2,
+.article-wrapper h3 {
+  font-family: 'Merriweather', serif;
+  color: #1a202c;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  50% {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
+.article-wrapper p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #4a5568;
+  margin-bottom: 1.25rem;
 }
 
-.prose {
-  max-width: none;
+.article-wrapper ul,
+.article-wrapper ol {
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.prose h1,
-.prose h2,
-.prose h3 {
-  @apply text-emerald-900 font-bold;
+.article-wrapper li {
+  margin-bottom: 0.75rem;
 }
 
-.prose p {
-  @apply leading-relaxed text-gray-700;
+.article-wrapper blockquote {
+  border-left: 4px solid #68d391;
+  background: #f0fff4;
+  padding: 1rem;
+  font-style: italic;
+  color: #22543d;
+  margin-bottom: 1.5rem;
 }
 
-.prose ul,
-.prose ol {
-  @apply my-4 ml-6 list-disc list-decimal text-gray-700;
+.article-wrapper strong {
+  font-weight: bold;
+  color: #2c5282;
 }
 
-.prose li {
-  @apply mb-2;
+.article-wrapper em {
+  font-style: italic;
+  color: #6b46c1;
 }
 
-.prose blockquote {
-  @apply border-l-4 border-emerald-500 pl-4 bg-emerald-50 italic text-gray-800;
+.article-wrapper img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 1.5rem 0;
 }
 
-.prose strong {
-  @apply text-emerald-900;
-}
-
-.prose em {
-  @apply text-emerald-600 italic;
-}
-
-.prose img {
-  @apply rounded-lg shadow-md mt-4 mb-4;
-}
-
-.prose hr {
-  @apply my-8 border-t-2 border-emerald-100;
+.article-wrapper hr {
+  border: none;
+  height: 2px;
+  background-color: #e2e8f0;
+  margin: 2rem 0;
 }
 </style>

@@ -28,18 +28,25 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, computed } from 'vue';
 import { useAuth } from '~/composables/useAuth';
-const auth = useAuth();
 
+const auth = useAuth();
 const isAuthenticated = computed(() => !!auth.user?.jwt);
 
 function logout() {
   auth.logout();
+
   // Ensure Zephr reset occurs on logout
-  if (window.zephrBrowser?.run) {
-    window.zephrBrowser.run({ jwt: '' });
-  }
-  window.location.href = '/'; // Redirect to homepage after logout
+  onMounted(() => {
+    if (typeof window !== 'undefined' && window.zephrBrowser?.run) {
+      console.log('%c[Zephr] Resetting session for anonymous user.', 'color: #f87171;');
+      window.zephrBrowser.run({ jwt: '', debug: true });
+    }
+  });
+
+  // Redirect to homepage
+  window.location.href = '/';
 }
 </script>
 
@@ -61,19 +68,6 @@ function logout() {
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-/* Logo Styling */
-.logo-link {
-  font-size: 1.75rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: #edf2f7;
-  text-decoration: none;
-}
-
-.logo-link:hover {
-  color: #63b3ed;
 }
 
 /* Navigation Links */
@@ -115,6 +109,7 @@ function logout() {
   transform: scale(1.05);
 }
 
+/* Logout Button */
 .logout-button {
   color: #f87171;
   font-weight: bold;
@@ -139,7 +134,7 @@ function logout() {
     gap: 10px;
   }
 
-  .logo-link {
+  .logo {
     font-size: 1.5rem;
   }
 }
