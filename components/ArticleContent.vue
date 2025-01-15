@@ -1,13 +1,31 @@
 <template>
   <ClientOnly>
-    <article v-if="!isLoading" class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
+    <article
+      v-if="!isLoading"
+      id="zephr-article-content"
+      class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8"
+    >
       <p v-if="isBlocked" class="text-red-600 text-center">
         This content is restricted. Please sign in to access.
       </p>
-      <div v-else>
-        <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
-        <ContentRenderer :value="doc.body" />
-      </div>
+
+      <!-- Render article content properly using ContentRenderer slots -->
+      <ContentRenderer v-else :value="doc.body">
+        <template #default="{ value }">
+          <div v-for="(node, index) in value.children" :key="index" class="mb-4">
+            <component :is="node.tag" v-bind="node.props">
+              <template v-for="(child, idx) in node.children || []" :key="idx">
+                <span v-if="child.type === 'text'">{{ child.value }}</span>
+                <component v-else :is="child.tag" v-bind="child.props">
+                  <template v-for="(innerChild, i) in child.children || []" :key="i">
+                    <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
+                  </template>
+                </component>
+              </template>
+            </component>
+          </div>
+        </template>
+      </ContentRenderer>
     </article>
     <p v-else class="text-gray-500 text-center">Loading article...</p>
   </ClientOnly>
@@ -28,58 +46,45 @@ defineProps({
   },
 });
 
-// Add the correct type definition
-interface ZephrDecision {
+// Extend the Zephr outcomes type to include featureResults
+type ZephrOutcomes = {
   outcomes?: Record<string, { outcomeLabel: string }>;
-  featureResults?: Record<string, string>; // Correct type for featureResults
-  accessDetails?: {
-    authenticated?: boolean;
-  };
-}
+  featureResults?: Record<string, string>; // Add featureResults explicitly
+  accessDetails?: any;
+};
 
-function handleZephrDecision() {
-  const decisionData = (window.Zephr || {}) as ZephrDecision;
-  const featureResults = decisionData.featureResults || {}; // Access featureResults safely
-  const accessDetails = decisionData.accessDetails || {};
-
-  console.log('%c[Zephr] Decision Data:', 'color: #4ade80;', decisionData);
-
-  // If authenticated, allow content
-  if (accessDetails.authenticated) {
-    console.log('%c[Zephr] User is authenticated. Showing content.', 'color: #10b981;');
-    isBlocked.value = false;
+// Use the type when accessing window.Zephr
+const handleZephrDecision = () => {
+  const zephrOutcome: ZephrOutcomes = window.Zephr || {};
+  
+  if (!zephrOutcome.featureResults) {
+    console.warn('No featureResults found from Zephr.');
+    isBlocked.value = true;
     isLoading.value = false;
     return;
   }
 
-  // Check the "edge-integration" decision
-  const featureOutcome = featureResults['edge-integration'];
+  // Example feature key for your implementation
+  const featureKey = 'edge-integration';
+  const featureResult = zephrOutcome.featureResults[featureKey];
 
-  if (featureOutcome && featureOutcome.includes('leave_pristine')) {
-    console.log('%c[Zephr] Outcome indicates unrestricted content.', 'color: #10b981;');
+  if (featureResult?.includes('Show all content')) {
+    console.log('[Zephr] Outcome allows content.');
     isBlocked.value = false;
   } else {
-    console.warn('%c[Zephr] Outcome indicates restricted content.', 'color: #f87171;');
+    console.warn('[Zephr] Outcome restricts content.');
     isBlocked.value = true;
   }
-
   isLoading.value = false;
-}
+};
+
 
 onMounted(() => {
-  if (auth.user?.jwt) {
-    console.log('%c[Zephr] Authenticated user detected. Loading article directly.', 'color: #10b981;');
-    isBlocked.value = false;
-    isLoading.value = false;
-    return;
-  }
-
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
-    console.log('%c[Zephr] Running Zephr decision...', 'color: #4ade80;');
     window.zephrBrowser.run({
-      jwt: '', // Empty for anonymous users
+      jwt: auth.user?.jwt || '',
       debug: true,
     });
   }
