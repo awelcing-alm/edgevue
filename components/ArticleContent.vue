@@ -1,10 +1,12 @@
 <template>
   <ClientOnly>
-    <article v-if="!isLoading" class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
+    <!-- Explicitly define the article wrapper with an ID for targeting in Zephr Console -->
+    <article id="zephr-article-content" class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
       <p v-if="isBlocked" class="text-red-600 text-center">
         This content is restricted. Please sign in to access.
       </p>
 
+      <!-- Render Article Content -->
       <div v-else>
         <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
         <ContentRenderer :value="doc.body">
@@ -20,15 +22,22 @@
         </ContentRenderer>
       </div>
     </article>
-    <p v-else class="text-gray-500 text-center">Loading article...</p>
+
+    <!-- Placeholder shown while loading -->
+    <div v-if="isLoading" class="loading-placeholder">
+      <p class="text-center text-gray-500">Loading article...</p>
+    </div>
   </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useAuth } from '~/composables/useAuth';
 
+const auth = useAuth();
 const isBlocked = ref(false);
 const isLoading = ref(true);
+
 defineProps({
   doc: {
     type: Object,
@@ -38,39 +47,67 @@ defineProps({
 
 // Handle Zephr Decision Logic
 function handleZephrDecision() {
-  const outcomes = window.Zephr?.outcomes || {};
+  const outcomes: Record<string, { outcomeLabel: string }> = window.Zephr?.outcomes || {};
   const featureKey = Object.keys(outcomes)[0] ?? '';
 
   if (!featureKey || !outcomes[featureKey]) {
-    isBlocked.value = true; // Default block if no decision
+    isBlocked.value = true;
     isLoading.value = false;
     return;
   }
 
-  const decision = outcomes[featureKey];
-  isBlocked.value = decision?.outcomeLabel !== 'allow';
+  const decision = outcomes[featureKey] as { outcomeLabel: string };
+  isBlocked.value = decision.outcomeLabel !== 'allow';
   isLoading.value = false;
 }
 
 onMounted(() => {
-  console.log('[ArticleContent] Mounted. Waiting for Zephr outcome...');
+  // Show content instantly if the user is logged in
+  if (auth.user?.jwt) {
+    console.log('Authenticated user detected: Showing article content instantly.');
+    isBlocked.value = false;
+    isLoading.value = false;
+    return;
+  }
 
+  // For unauthenticated users, wait for Zephr decision
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
-  if (window.Zephr?.outcomes) {
-    console.log('[Zephr] Outcomes already available on load.');
-    handleZephrDecision();
-  } else if (window.zephrBrowser?.run) {
+  if (window.zephrBrowser?.run) {
+    console.log('Waiting for Zephr decision...');
     window.zephrBrowser.run({
-      jwt: '', // Anonymous user session
+      jwt: '', // Empty JWT for anonymous users
       debug: true,
     });
   }
 });
 </script>
 
-
 <style scoped>
+.article-wrapper {
+  border: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.loading-placeholder {
+  min-height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.05);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
 .prose {
   max-width: none;
 }

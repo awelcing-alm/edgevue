@@ -5,43 +5,31 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth';
 import { onMounted } from 'vue';
 
-const auth = useAuth();
-
-// Initialize Zephr and handle outcomes globally
 onMounted(() => {
-  console.log('%c[App] Zephr initialization started...', 'color: #38bdf8');
+  console.log('%c[Zephr] Initializing...', 'color: #4ade80; font-weight: bold;');
 
-  if (typeof window === 'undefined') return;
+  if (!document.getElementById('zephr-script')) {
+    const script = document.createElement('script');
+    script.id = 'zephr-script';
+    script.src = 'https://assets.zephr.com/zephr-browser/1.9.1/zephr-browser.umd.js';
+    script.async = true;
 
-  const handleZephrOutcome = () => {
-    console.log('%c[Zephr] Outcomes received.', 'color: #4ade80; font-weight: bold;', window.Zephr?.outcomes);
-
-    const outcomes = window.Zephr?.outcomes || {};
-    const featureKeys = Object.keys(outcomes);
-
-    // Check if there's an outcome related to article content
-    featureKeys.forEach((key) => {
-      const outcomeLabel = outcomes[key]?.outcomeLabel;
-      if (outcomeLabel === 'allow') {
-        console.log('%c[Zephr] Content allowed', 'color: #4ade80;');
+    script.onload = () => {
+      console.log('%c[Zephr] Script loaded successfully.', 'color: #10b981;');
+      if (window.zephrBrowser) {
+        window.zephrBrowser.run({
+          jwt: '', // Ensure the correct JWT or empty string for anonymous users.
+          debug: true,
+        });
       } else {
-        console.warn(`[Zephr] Feature "${key}" restricted with outcome "${outcomeLabel}".`);
+        console.error('%c[Zephr] zephrBrowser.run is not available!', 'color: #f87171;');
       }
-    });
-  };
+    };
 
-  document.addEventListener('zephr.browserDecisionsFinished', handleZephrOutcome);
-
-  if (window.zephrBrowser?.run) {
-    window.zephrBrowser.run({
-      jwt: auth.user?.jwt || '', // Send user JWT if authenticated
-      debug: true,
-    });
-  } else {
-    console.error('[Zephr] zephrBrowser.run is not available.');
+    script.onerror = () => console.error('%c[Zephr] Failed to load Zephr script.', 'color: #f87171;');
+    document.head.appendChild(script);
   }
 });
 </script>
