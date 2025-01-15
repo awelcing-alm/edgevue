@@ -1,53 +1,103 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-b from-iguanaGreen to-desertSand flex flex-col items-center justify-center py-10">
-      <img src="/images/gecko-hero.png" alt="Gecko Hero" class="w-36 mb-4 animate-bounce" />
-      <h1 class="text-4xl font-extrabold text-gray-800 drop-shadow-lg">
-        Welcome Back, Lizard Friend!
-      </h1>
-      <form @submit.prevent="onSubmit" class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md mt-6">
-        <div class="mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            v-model="email"
-            id="email"
-            placeholder="scales@example.com"
-            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-geckoOrange focus:border-geckoOrange"
-            required
-          />
+    <div class="login-container">
+      <!-- Navigation and Welcome -->
+      <header class="hero-header">
+        <TopNav slim />
+        <h1 class="hero-title">Welcome Back, Lizard Fan! 🦎</h1>
+        <p class="hero-subtitle">Log in to continue your reptile adventures.</p>
+      </header>
+  
+      <!-- Zephr Login Form Injection -->
+      <div class="form-wrapper">
+        <div id="zephr-login-form" class="form-placeholder">
+          <p class="text-gray-500 italic">Loading your personalized login form...</p>
         </div>
-        <div class="mb-6">
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-          <input
-            type="password"
-            v-model="password"
-            id="password"
-            placeholder="********"
-            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-geckoOrange focus:border-geckoOrange"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          class="w-full py-2 px-4 bg-geckoOrange text-white font-semibold rounded-lg shadow-lg hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-geckoOrange"
-        >
-          Log In
-        </button>
-      </form>
-      <p class="mt-4 text-gray-600">
-        Don’t have an account? <a href="/register" class="text-geckoOrange hover:underline">Register here</a>.
-      </p>
+      </div>
+  
+      <!-- Cookie Banner -->
+      <div v-if="showCookieBanner" class="cookie-banner">
+        <p>We use cookies to enhance your experience.</p>
+        <button @click="acceptCookies" class="cookie-button">Understood!</button>
+      </div>
     </div>
   </template>
   
   <script setup lang="ts">
-import { useAuth } from '@/composables/useAuth'; // Correct import path
-const auth = useAuth();
-  const email = ref('');
-  const password = ref('');
+  import { useCookie } from '#app';
+  import { ref } from 'vue';
   
-  async function onSubmit() {
-    await auth.login(email.value, password.value);
+  const cookieConsent = useCookie('cookieConsent', { default: () => 'false' });
+  const showCookieBanner = ref(cookieConsent.value !== 'true');
+  
+  function acceptCookies() {
+    cookieConsent.value = 'true';
+    showCookieBanner.value = false;
   }
   </script>
+  
+  <style module>
+  .loginContainer {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #f5f7fa, #ffffff);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 3rem;
+  }
+  
+  .heroHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #3b7973;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.25rem;
+    color: #5a5a5a;
+  }
+  
+  .formWrapper {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .formPlaceholder {
+    min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #d1d5db;
+  }
+  
+  .cookieBanner {
+    margin-top: 2rem;
+    background-color: #fefcbf;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .cookieButton {
+    background-color: #34d399;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  </style>
   

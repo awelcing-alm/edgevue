@@ -1,60 +1,115 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gradient-radial from-geckoOrange via-desertSand to-white py-10">
-      <div class="bg-white rounded-lg shadow-lg p-10 w-full max-w-md">
-        <img src="/images/bearded-dragon.svg" class="w-32 mx-auto mb-6" />
-        <h2 class="text-2xl font-bold text-center mb-4">Join Our Scaly Community!</h2>
-        <form @submit.prevent="onSubmit">
-          <div class="mb-4">
-            <label for="name" class="block text-sm font-medium">Name</label>
-            <input
-              type="text"
-              id="name"
-              v-model="name"
-              placeholder="Cool Lizard Enthusiast"
-              class="mt-1 w-full border border-gray-300 rounded-md shadow-sm focus:ring-iguanaGreen"
-              required
-            />
-          </div>
-          <div class="mb-4">
-            <label for="email" class="block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              id="email"
-              v-model="email"
-              class="mt-1 w-full border border-gray-300 rounded-md shadow-sm"
-              required
-            />
-          </div>
-          <div class="mb-4">
-            <label for="password" class="block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              id="password"
-              v-model="password"
-              class="mt-1 w-full border border-gray-300 rounded-md shadow-sm"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full py-3 bg-geckoOrange text-white font-semibold rounded-md hover:bg-orange-400"
-          >
-            Sign Up
-          </button>
-        </form>
+    <div class="register-container">
+      <!-- Hero Section with Header and Navigation -->
+      <header class="hero-header">
+        <TopNav />
+        <h1 class="hero-title">Join the Scaly Side! 🦎</h1>
+        <p class="hero-subtitle">Become part of the ultimate lizard-lover’s community.</p>
+      </header>
+  
+      <!-- Form Container for Zephr Form -->
+      <div class="form-wrapper">
+        <div id="zephr-register-form" class="form-placeholder">
+          <p class="text-gray-500 italic">Loading personalized registration form...</p>
+        </div>
+      </div>
+  
+      <!-- Custom Cookie Management Banner (Optional Placeholder) -->
+      <div v-if="showCookieBanner" class="cookie-banner">
+        <p>We use cookies to personalize your experience and track outcomes.</p>
+        <button @click="acceptCookies" class="cookie-button">Got it!</button>
       </div>
     </div>
   </template>
   
   <script setup lang="ts">
-  import { useAuth } from '@/composables/useAuth';
-  const auth = useAuth();
-  const email = ref('');
-  const password = ref('');
-  const name = ref('');
+  import { useCookie } from '#app';
+  import { ref } from 'vue';
   
-  async function onSubmit() {
-    await auth.login(email.value, password.value);
+  const cookieConsent = useCookie('cookieConsent', { default: () => 'false' });
+  const showCookieBanner = ref(cookieConsent.value !== 'true');
+  
+  function acceptCookies() {
+    cookieConsent.value = 'true';
+    showCookieBanner.value = false;
+    console.log('User accepted cookies');
   }
   </script>
+  
+  <style module>
+  .registerContainer {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #ecfdf5, #f4e4c1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 3rem;
+  }
+  
+  .heroHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #3b7973;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.25rem;
+    color: #5a5a5a;
+  }
+  
+  .formWrapper {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .formPlaceholder {
+    min-height: 300px; /* Enough space for Zephr's injected form */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #d1d5db;
+  }
+  
+  .cookieBanner {
+    margin-top: 2rem;
+    background-color: #fefcbf;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .cookieButton {
+    background-color: #fbbf24;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  </style>
   

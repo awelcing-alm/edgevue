@@ -1,4 +1,5 @@
-import { useAuth } from '@/composables/useAuth'; // Import the useAuth composable
+import type { Pinia } from 'pinia'; // Use type-only import
+import { useAuth } from '@/composables/useAuth'; // Import the composable
 
 export default defineNuxtPlugin((nuxtApp) => {
   const loadZephrScript = () => {
@@ -31,13 +32,13 @@ export default defineNuxtPlugin((nuxtApp) => {
           return;
         }
 
-        // Access Pinia's auth store through the Nuxt app context
-        const auth = useAuth(nuxtApp.$pinia); // Pass in the Pinia store instance
+        const pinia = nuxtApp.$pinia as Pinia; // Explicitly cast to Pinia
+        const auth = useAuth(pinia);
         const jwtToken = auth.jwt ?? '';
 
         window.zephrBrowser.run({
           jwt: jwtToken,
-          debug: true, // Enable debug mode for local testing
+          debug: true, // Enable debug mode
         });
       })
       .catch((error) => {
