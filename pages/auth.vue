@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '~/composables/useAuth';
 import TopNav from '~/components/TopNav.vue';
@@ -42,36 +42,39 @@ const openCookieSettings = () => {
   component?.__vueParentComponent?.ctx?.openManageModal();
 };
 
+const formSuccessListener = () => {
+  console.log('%c[Zephr] Form submission successful! Redirecting to homepage...', 'color: #10b981;');
+
+  // Extract the JWT from Zephr after form success (simulating the real response)
+  const jwtToken = 'real-user-jwt'; // Replace this with real JWT handling from Zephr if needed
+  auth.login('User', 'user@example.com', jwtToken); // Update user state with JWT
+  router.push('/'); // Redirect to homepage after successful login
+};
+
 onMounted(() => {
   if (typeof window === 'undefined') return;
 
   console.log('%c[Zephr] Mounting form...', 'color: #4ade80; font-weight: bold;');
 
-  // Initialize Zephr Form
   if (window.zephrBrowser?.run) {
     window.zephrBrowser.run({
       jwt: auth.user?.jwt || '', // Pass JWT if available
       debug: true,
     });
 
-    // Show form as soon as the Zephr form renders successfully
-    const formRenderedListener = () => {
-      console.log('%c[Zephr] Form loaded successfully.', 'color: #10b981;');
-      loadingForm.value = false;
-    };
+    document.addEventListener('zephr.formSuccess', formSuccessListener); // Handle form submission success
 
-    // Listen for form success
-    document.addEventListener('zephr.formRendered', formRenderedListener);
+    document.addEventListener('zephr.formRendered', () => {
+      console.log('%c[Zephr] Form rendered successfully.', 'color: #10b981;');
+      loadingForm.value = false;
+    });
   } else {
     console.warn('%c[Zephr] Zephr script not available.', 'color: #f87171;');
   }
+});
 
-  // Handle successful form submission
-  document.addEventListener('zephr.formSuccess', () => {
-    console.log('%c[Zephr] Form submission successful! Redirecting to homepage...', 'color: #10b981;');
-    auth.login('User', 'user@example.com', auth.user?.jwt || '');
-    router.push('/'); // Redirect to homepage after successful login
-  });
+onUnmounted(() => {
+  document.removeEventListener('zephr.formSuccess', formSuccessListener);
 });
 </script>
 

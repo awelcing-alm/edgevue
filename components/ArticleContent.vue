@@ -5,7 +5,6 @@
         This content is restricted. Please sign in to access.
       </p>
 
-      <!-- Render Article Content -->
       <div v-else>
         <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
         <ContentRenderer :value="doc.body">
@@ -27,12 +26,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useAuth } from '~/composables/useAuth';
 
-const auth = useAuth();
 const isBlocked = ref(false);
 const isLoading = ref(true);
-
 defineProps({
   doc: {
     type: Object,
@@ -42,41 +38,37 @@ defineProps({
 
 // Handle Zephr Decision Logic
 function handleZephrDecision() {
-  const outcomes: Record<string, { outcomeLabel: string }> = window.Zephr?.outcomes || {};
+  const outcomes = window.Zephr?.outcomes || {};
   const featureKey = Object.keys(outcomes)[0] ?? '';
 
   if (!featureKey || !outcomes[featureKey]) {
-    console.warn('%c[Zephr] No outcomes found. Blocking content by default.', 'color: #f87171;');
-    isBlocked.value = true;
+    isBlocked.value = true; // Default block if no decision
     isLoading.value = false;
     return;
   }
 
-  const decision = outcomes[featureKey] as { outcomeLabel: string };
-  console.log(`%c[Zephr] Article decision: ${decision.outcomeLabel}`, 'color: #4ade80;');
-  isBlocked.value = decision.outcomeLabel !== 'allow';
+  const decision = outcomes[featureKey];
+  isBlocked.value = decision?.outcomeLabel !== 'allow';
   isLoading.value = false;
 }
 
 onMounted(() => {
-  if (auth.user?.jwt) {
-    console.log('Authenticated user detected: Showing article content instantly.');
-    isBlocked.value = false;
-    isLoading.value = false;
-    return;
-  }
+  console.log('[ArticleContent] Mounted. Waiting for Zephr outcome...');
 
-  console.log('Waiting for Zephr decision...');
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
-  if (window.zephrBrowser?.run) {
+  if (window.Zephr?.outcomes) {
+    console.log('[Zephr] Outcomes already available on load.');
+    handleZephrDecision();
+  } else if (window.zephrBrowser?.run) {
     window.zephrBrowser.run({
-      jwt: '', // Anonymous users
+      jwt: '', // Anonymous user session
       debug: true,
     });
   }
 });
 </script>
+
 
 <style scoped>
 .prose {

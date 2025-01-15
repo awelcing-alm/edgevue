@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <NuxtPage /> <!-- Always render the NuxtPage -->
+    <NuxtPage />
   </div>
 </template>
 
@@ -10,34 +10,38 @@ import { onMounted } from 'vue';
 
 const auth = useAuth();
 
+// Initialize Zephr and handle outcomes globally
 onMounted(() => {
+  console.log('%c[App] Zephr initialization started...', 'color: #38bdf8');
+
   if (typeof window === 'undefined') return;
 
-  console.log('%c[Zephr] Initializing...', 'color: #4ade80; font-weight: bold;');
-  if (window.zephrBrowser) {
-    window.zephrBrowser.run({
-      jwt: auth.user?.jwt || '', // Pass user’s JWT if available
-      debug: true, // Enable debug logs for feature decisions
+  const handleZephrOutcome = () => {
+    console.log('%c[Zephr] Outcomes received.', 'color: #4ade80; font-weight: bold;', window.Zephr?.outcomes);
+
+    const outcomes = window.Zephr?.outcomes || {};
+    const featureKeys = Object.keys(outcomes);
+
+    // Check if there's an outcome related to article content
+    featureKeys.forEach((key) => {
+      const outcomeLabel = outcomes[key]?.outcomeLabel;
+      if (outcomeLabel === 'allow') {
+        console.log('%c[Zephr] Content allowed', 'color: #4ade80;');
+      } else {
+        console.warn(`[Zephr] Feature "${key}" restricted with outcome "${outcomeLabel}".`);
+      }
     });
+  };
+
+  document.addEventListener('zephr.browserDecisionsFinished', handleZephrOutcome);
+
+  if (window.zephrBrowser?.run) {
+    window.zephrBrowser.run({
+      jwt: auth.user?.jwt || '', // Send user JWT if authenticated
+      debug: true,
+    });
+  } else {
+    console.error('[Zephr] zephrBrowser.run is not available.');
   }
-
-  // Global listener for feature decisions and successful form submissions
-  document.addEventListener('zephr.browserDecisionsFinished', () => {
-    console.log('%c[Zephr] Decisions processed.', 'color: #4ade80;');
-  });
-
-  document.addEventListener('zephr.formSuccess', () => {
-    console.log('%c[Zephr] Form submission successful! Redirecting to homepage...', 'color: #10b981;');
-    auth.login('User', 'user@example.com', auth.user?.jwt || '');
-    window.location.href = '/'; // Redirect user to the homepage after login
-  });
 });
 </script>
-
-<style scoped>
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-</style>
