@@ -1,50 +1,26 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-interface UserProfile {
+interface AuthUser {
   name: string;
   email: string;
+  jwt?: string; // Include JWT
 }
 
-interface AuthState {
-  jwt: string | null;
-  user: UserProfile | null;
-  isAuthenticated: boolean;
-}
+export const useAuth = defineStore('auth', () => {
+  const user = ref<AuthUser | null>(null); // User can be null initially
 
-export const useAuth = defineStore('auth', {
-  state: (): AuthState => ({
-    jwt: null,
-    user: null,
-    isAuthenticated: false,
-  }),
-  actions: {
-    async login(email: string, password: string) {
-      const { data } = await useFetch<{ token: string }>('/api/login', {
-        method: 'POST',
-        body: { email, password },
-      });
+  const login = (name: string, email: string, jwt: string) => {
+    user.value = { name, email, jwt }; // Set JWT during login
+  };
 
-      if (data?.value?.token) {
-        this.jwt = data.value.token;
-        this.isAuthenticated = true;
-        document.cookie = `auth_token=${this.jwt}; path=/; secure`;
-        await this.fetchUserProfile();
-      }
-    },
+  const logout = () => {
+    user.value = null; // Clear user data on logout
+  };
 
-    async fetchUserProfile() {
-      const { data } = await useFetch<UserProfile>('/api/profile', {
-        headers: { Authorization: `Bearer ${this.jwt}` },
-      });
-
-      this.user = data?.value || null;
-    },
-
-    logout() {
-      this.jwt = null;
-      this.user = null;
-      this.isAuthenticated = false;
-      document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-    },
-  },
+  return {
+    user,
+    login,
+    logout,
+  };
 });

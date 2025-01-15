@@ -4,22 +4,10 @@
       <p v-if="isBlocked" class="text-red-600">
         This content is restricted. Please log in to access.
       </p>
-      <ContentRenderer v-else :value="doc.body">
-        <template #default="{ value }">
-          <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-            <component :is="node.tag" v-bind="node.props">
-              <template v-for="(child, idx) in node.children || []" :key="idx">
-                <span v-if="child.type === 'text'">{{ child.value }}</span>
-                <component v-else :is="child.tag" v-bind="child.props">
-                  <template v-for="(innerChild, i) in innerChild.children || []" :key="i">
-                    <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                  </template>
-                </component>
-              </template>
-            </component>
-          </div>
-        </template>
-      </ContentRenderer>
+      <div v-else>
+        <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
+        <ContentRenderer :value="doc.body" />
+      </div>
     </article>
     <p v-else class="text-gray-500">Loading article...</p>
   </ClientOnly>
@@ -37,95 +25,48 @@ defineProps({
   },
 });
 
-// Function to handle the feature decision
 function handleZephrDecision() {
   const outcomes = window.Zephr?.outcomes || {};
   const featureKeys = Object.keys(outcomes);
 
   if (featureKeys.length > 0) {
-    // Get the decision of the first feature (or a specific feature key)
-    const featureKey = featureKeys[0]; // Adjust this to the expected feature ID if needed
-    const decision = outcomes[featureKey];
+  const featureKey = featureKeys[0]; // Access the first feature key
 
-    if (!featureKey) {
-      console.warn('Feature key is undefined.');
-      isLoading.value = false;
-      return;
-    }
-
-    if (!decision) {
-      console.warn(`No decision found for feature: ${featureKey}`);
-    }
-
-    // Check if the outcome label indicates that content is allowed
-    isBlocked.value = decision?.outcomeLabel !== 'allow'; // Mark blocked if outcome is not 'allow'
-  } else {
-    console.warn('No outcomes found from Zephr.');
+  if (!featureKey || !(featureKey in outcomes)) {
+    console.warn('Feature key is undefined or not found in outcomes.');
+    isBlocked.value = true; // Default behavior if the key isn’t valid
+    isLoading.value = false;
+    return;
   }
 
-  isLoading.value = false; // Set loading to false once decision is processed
+  const decision = outcomes[featureKey];
+  isBlocked.value = decision?.outcomeLabel !== 'allow';
+}
+
+  isLoading.value = false;
 }
 
 onMounted(() => {
-  if (typeof window === 'undefined') return;
-
-  // Add an event listener to detect when Zephr finishes processing
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
-  // If Zephr has already run before the page was loaded
   if (window.Zephr?.outcomes) {
     handleZephrDecision();
   } else if (window.zephrBrowser?.run) {
-    console.log('Running Zephr for feature decisions...');
-    window.zephrBrowser.run({
-      jwt: '', // Optional JWT token if needed
-      debug: true, // Enable debug mode to see detailed logs
-    });
+    window.zephrBrowser.run({ jwt: '', debug: true });
   }
 });
 </script>
 
 <style scoped>
-.prose {
-  max-width: none;
-}
-
 .prose h1,
 .prose h2,
 .prose h3 {
-  @apply text-emerald-900 font-bold;
+  color: #3b7973;
+  font-weight: bold;
 }
-
-.prose p {
-  @apply leading-relaxed text-gray-700;
-}
-
-.prose ul,
-.prose ol {
-  @apply my-4 ml-6 list-disc list-decimal text-gray-700;
-}
-
-.prose li {
-  @apply mb-2;
-}
-
 .prose blockquote {
-  @apply border-l-4 border-emerald-500 pl-4 bg-emerald-50 italic text-gray-800;
-}
-
-.prose strong {
-  @apply text-emerald-900;
-}
-
-.prose em {
-  @apply text-emerald-600 italic;
-}
-
-.prose img {
-  @apply rounded-lg shadow-md mt-4 mb-4;
-}
-
-.prose hr {
-  @apply my-8 border-t-2 border-emerald-100;
+  border-left: 4px solid #fdae61;
+  background: #fff3e0;
+  padding-left: 1rem;
 }
 </style>
