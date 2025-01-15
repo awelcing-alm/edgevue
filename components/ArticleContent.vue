@@ -1,3 +1,30 @@
+<template>
+  <ClientOnly>
+    <article v-if="!isLoading" class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
+      <p v-if="isBlocked" class="text-red-600 text-center">
+        This content is restricted. Please sign in to access.
+      </p>
+
+      <!-- Render Article Content -->
+      <div v-else>
+        <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
+        <ContentRenderer :value="doc.body">
+          <template #default="{ value }">
+            <div v-for="(node, index) in value.children" :key="index" class="mb-4">
+              <component :is="node.tag" v-bind="node.props">
+                <template v-for="(child, idx) in node.children || []" :key="idx">
+                  <span v-if="child.type === 'text'">{{ child.value }}</span>
+                </template>
+              </component>
+            </div>
+          </template>
+        </ContentRenderer>
+      </div>
+    </article>
+    <p v-else class="text-gray-500 text-center">Loading article...</p>
+  </ClientOnly>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuth } from '~/composables/useAuth';
@@ -13,36 +40,24 @@ defineProps({
   },
 });
 
+// Handle Zephr Decision Logic
 function handleZephrDecision() {
-  const outcomes = window.Zephr?.outcomes || {};
-  const featureKeys = Object.keys(outcomes);
+  const outcomes: Record<string, { outcomeLabel: string }> = window.Zephr?.outcomes || {};
+  const featureKey = Object.keys(outcomes)[0] ?? '';
 
-  if (featureKeys.length === 0) {
-    console.warn('No outcomes found. Blocking content by default.');
+  if (!featureKey || !outcomes[featureKey]) {
     isBlocked.value = true;
     isLoading.value = false;
     return;
   }
 
-  const featureKey = featureKeys[0];
-  if (!featureKey || !(featureKey in outcomes)) {
-    console.warn(`Feature key is undefined or not found in outcomes.`);
-    isBlocked.value = true;
-    isLoading.value = false;
-    return;
-  }
-
-  const decision = outcomes[featureKey];
-  if (!decision) {
-    console.warn(`No decision found for feature: ${featureKey}`);
-    isBlocked.value = true;
-  } else {
-    isBlocked.value = decision?.outcomeLabel !== 'allow';
-  }
+  const decision = outcomes[featureKey] as { outcomeLabel: string };
+  isBlocked.value = decision.outcomeLabel !== 'allow';
   isLoading.value = false;
 }
 
 onMounted(() => {
+  // Show content instantly if the user is logged in
   if (auth.user?.jwt) {
     console.log('Authenticated user detected: Showing article content instantly.');
     isBlocked.value = false;
@@ -50,11 +65,13 @@ onMounted(() => {
     return;
   }
 
+  // For unauthenticated users, wait for Zephr decision
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
+
   if (window.zephrBrowser?.run) {
     console.log('Waiting for Zephr decision...');
     window.zephrBrowser.run({
-      jwt: '',
+      jwt: '', // Empty JWT for anonymous users
       debug: true,
     });
   }
@@ -62,44 +79,46 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add regular classes if @apply isn't working */
+.prose {
+  max-width: none;
+}
+
 .prose h1,
 .prose h2,
 .prose h3 {
-  color: #065f46;
-  font-weight: bold;
+  @apply text-emerald-900 font-bold;
 }
 
 .prose p {
-  line-height: 1.75;
-  color: #374151;
+  @apply leading-relaxed text-gray-700;
 }
 
 .prose ul,
 .prose ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  list-style-position: outside;
+  @apply my-4 ml-6 list-disc list-decimal text-gray-700;
 }
 
 .prose li {
-  margin-bottom: 0.5rem;
+  @apply mb-2;
 }
 
 .prose blockquote {
-  border-left: 4px solid #10b981;
-  padding-left: 1rem;
-  background-color: #ecfdf5;
-  font-style: italic;
-  color: #1f2937;
+  @apply border-l-4 border-emerald-500 pl-4 bg-emerald-50 italic text-gray-800;
 }
 
 .prose strong {
-  color: #065f46;
+  @apply text-emerald-900;
 }
 
 .prose em {
-  color: #047857;
-  font-style: italic;
+  @apply text-emerald-600 italic;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md mt-4 mb-4;
+}
+
+.prose hr {
+  @apply my-8 border-t-2 border-emerald-100;
 }
 </style>
