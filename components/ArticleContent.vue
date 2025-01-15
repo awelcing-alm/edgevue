@@ -92,72 +92,101 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .article-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  background-color: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.article-wrapper h1,
-.article-wrapper h2,
-.article-wrapper h3 {
-  font-family: 'Merriweather', serif;
-  color: #1a202c;
-  margin-top: 1.5rem;
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: #3b7973; /* Dark teal for headings */
+  font-weight: 700;
   margin-bottom: 1rem;
 }
 
-.article-wrapper p {
+.prose h1 {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.prose h2 {
+  font-size: 2rem;
+  margin-top: 1.5rem;
+}
+
+.prose h3 {
+  font-size: 1.75rem;
+}
+
+.prose p {
+  color: #4a5568; /* Neutral dark gray */
   font-size: 1.125rem;
   line-height: 1.8;
-  color: #4a5568;
   margin-bottom: 1.25rem;
 }
 
-.article-wrapper ul,
-.article-wrapper ol {
-  margin-left: 1.5rem;
-  padding-left: 1rem;
-  margin-bottom: 1.5rem;
+.prose a {
+  color: #3182ce; /* Blue for links */
+  text-decoration: underline;
 }
 
-.article-wrapper li {
+.prose a:hover {
+  color: #2b6cb0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose li {
   margin-bottom: 0.75rem;
+  line-height: 1.5;
 }
 
-.article-wrapper blockquote {
-  border-left: 4px solid #68d391;
-  background: #f0fff4;
-  padding: 1rem;
+.prose strong {
+  color: #2d3748; /* Bold dark text */
+}
+
+.prose em {
   font-style: italic;
-  color: #22543d;
-  margin-bottom: 1.5rem;
+  color: #6b7280;
 }
 
-.article-wrapper strong {
-  font-weight: bold;
-  color: #2c5282;
-}
-
-.article-wrapper em {
-  font-style: italic;
-  color: #6b46c1;
-}
-
-.article-wrapper img {
+.prose img {
   max-width: 100%;
-  border-radius: 10px;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prose blockquote {
+  border-left: 4px solid #2c7a7b; /* Teal border */
+  padding-left: 1rem;
+  background-color: #f0fff4; /* Light green background */
+  font-style: italic;
   margin: 1.5rem 0;
 }
 
-.article-wrapper hr {
-  border: none;
-  height: 2px;
-  background-color: #e2e8f0;
+.prose hr {
   margin: 2rem 0;
+  border: none;
+  border-top: 2px solid #e2e8f0; /* Light gray horizontal line */
+}
+
+.code-block {
+  background-color: #f7fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 </style>

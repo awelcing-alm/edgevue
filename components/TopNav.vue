@@ -1,9 +1,9 @@
 <template>
   <nav class="nav-container">
     <div class="nav-content">
-      <!-- Logo -->
+      <!-- Logo Section -->
       <div class="logo">
-        <NuxtLink to="/" class="text-2xl font-bold tracking-wider text-emerald-50">
+        <NuxtLink to="/" class="logo-link">
           🦎 NEWTS' NEWS
         </NuxtLink>
       </div>
@@ -15,7 +15,7 @@
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
 
         <!-- Auth State -->
-        <div v-if="isAuthenticated" class="flex items-center gap-4">
+        <div v-if="isAuthenticated" class="auth-links flex items-center gap-4">
           <span class="welcome-text">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
           <button @click="logout" class="logout-button">LOGOUT</button>
         </div>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { computed } from 'vue';
 import { useAuth } from '~/composables/useAuth';
 
 const auth = useAuth();
@@ -36,22 +36,16 @@ const isAuthenticated = computed(() => !!auth.user?.jwt);
 
 function logout() {
   auth.logout();
-
-  // Ensure Zephr reset occurs on logout
-  onMounted(() => {
-    if (typeof window !== 'undefined' && window.zephrBrowser?.run) {
-      console.log('%c[Zephr] Resetting session for anonymous user.', 'color: #f87171;');
-      window.zephrBrowser.run({ jwt: '', debug: true });
-    }
-  });
-
-  // Redirect to homepage
-  window.location.href = '/';
+  if (window.zephrBrowser?.run) {
+    console.log('%c[Zephr] Resetting session for anonymous user.', 'color: #f87171;');
+    window.zephrBrowser.run({ jwt: '' });
+  }
+  window.location.href = '/'; // Redirect to homepage after logout
 }
 </script>
 
 <style scoped>
-/* Navigation Container */
+/* Restore consistent branding and font sizes */
 .nav-container {
   background-color: #1a202c;
   padding: 1rem 2rem;
@@ -61,7 +55,6 @@ function logout() {
   z-index: 50;
 }
 
-/* Navigation Content */
 .nav-content {
   display: flex;
   justify-content: space-between;
@@ -70,7 +63,18 @@ function logout() {
   margin: 0 auto;
 }
 
-/* Navigation Links */
+.logo-link {
+  font-size: 1.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #edf2f7;
+  text-decoration: none;
+}
+
+.logo-link:hover {
+  color: #63b3ed;
+}
+
 .nav-links {
   display: flex;
   gap: 20px;
@@ -82,19 +86,12 @@ function logout() {
   text-transform: uppercase;
   font-weight: 500;
   transition: color 0.3s ease-in-out;
-  text-decoration: none;
 }
 
 .nav-link:hover {
-  color: #63b3ed; /* Hover effect */
+  color: #63b3ed;
 }
 
-.nav-link.active {
-  color: #90cdf4; /* Active link color */
-  border-bottom: 2px solid #90cdf4;
-}
-
-/* Register Button */
 .register-button {
   background-color: #fdae61;
   color: white;
@@ -109,7 +106,6 @@ function logout() {
   transform: scale(1.05);
 }
 
-/* Logout Button */
 .logout-button {
   color: #f87171;
   font-weight: bold;
@@ -119,23 +115,17 @@ function logout() {
   color: #fb7185;
 }
 
-/* Welcome Text */
 .welcome-text {
   color: #f1f5f9;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-/* Responsive Menu for Small Screens */
 @media (max-width: 768px) {
   .nav-links {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-  }
-
-  .logo {
-    font-size: 1.5rem;
   }
 }
 </style>
