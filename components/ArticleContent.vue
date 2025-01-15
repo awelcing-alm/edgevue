@@ -1,38 +1,8 @@
-<template>
-  <ClientOnly>
-    <article v-if="!isLoading" class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
-      <!-- Restricted Message -->
-      <p v-if="isBlocked" class="text-red-600 text-center">
-        This content is restricted. Please log in to access.
-      </p>
-
-      <!-- Render Article Content -->
-      <ContentRenderer v-else :value="doc.body">
-        <template #default="{ value }">
-          <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-            <component :is="node.tag" v-bind="node.props">
-              <template v-for="(child, idx) in node.children || []" :key="idx">
-                <span v-if="child.type === 'text'">{{ child.value }}</span>
-                <component v-else :is="child.tag" v-bind="child.props">
-                  <template v-for="(innerChild, i) in child.children || []" :key="i">
-                    <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                  </template>
-                </component>
-              </template>
-            </component>
-          </div>
-        </template>
-      </ContentRenderer>
-    </article>
-
-    <p v-else class="text-gray-500 text-center">Loading article...</p>
-  </ClientOnly>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useAuth } from '~/composables/useAuth';
 
-// State for blocking and loading
+const auth = useAuth();
 const isBlocked = ref(false);
 const isLoading = ref(true);
 
@@ -43,43 +13,48 @@ defineProps({
   },
 });
 
-// Function to handle the Zephr decision
 function handleZephrDecision() {
   const outcomes = window.Zephr?.outcomes || {};
   const featureKeys = Object.keys(outcomes);
 
-  if (featureKeys.length > 0) {
-    const featureKey = featureKeys[0]; // Get the first feature key (if exists)
-    const decision = outcomes[featureKey];
-
-    if (!decision) {
-      console.warn(`No decision found for feature: ${featureKey}`);
-      isBlocked.value = true;
-    } else {
-      // Check if the outcome label allows access
-      isBlocked.value = decision?.outcomeLabel !== 'allow';
-    }
-  } else {
-    console.warn('No outcomes found from Zephr.');
+  if (featureKeys.length === 0) {
+    console.warn('No outcomes found. Blocking content by default.');
     isBlocked.value = true;
+    isLoading.value = false;
+    return;
   }
 
-  isLoading.value = false; // Content is ready to render
+  const featureKey = featureKeys[0];
+  if (!featureKey || !(featureKey in outcomes)) {
+    console.warn(`Feature key is undefined or not found in outcomes.`);
+    isBlocked.value = true;
+    isLoading.value = false;
+    return;
+  }
+
+  const decision = outcomes[featureKey];
+  if (!decision) {
+    console.warn(`No decision found for feature: ${featureKey}`);
+    isBlocked.value = true;
+  } else {
+    isBlocked.value = decision?.outcomeLabel !== 'allow';
+  }
+  isLoading.value = false;
 }
 
 onMounted(() => {
-  if (typeof window === 'undefined') return;
+  if (auth.user?.jwt) {
+    console.log('Authenticated user detected: Showing article content instantly.');
+    isBlocked.value = false;
+    isLoading.value = false;
+    return;
+  }
 
-  // Listen for Zephr decision event
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
-
-  // If Zephr decisions already exist, handle them immediately
-  if (window.Zephr?.outcomes) {
-    handleZephrDecision();
-  } else if (window.zephrBrowser?.run) {
-    console.log('Running Zephr for feature decisions...');
+  if (window.zephrBrowser?.run) {
+    console.log('Waiting for Zephr decision...');
     window.zephrBrowser.run({
-      jwt: '', // Add the JWT if necessary
+      jwt: '',
       debug: true,
     });
   }
@@ -87,42 +62,44 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Add regular classes if @apply isn't working */
 .prose h1,
 .prose h2,
 .prose h3 {
-  @apply text-emerald-900 font-bold;
+  color: #065f46;
+  font-weight: bold;
 }
 
 .prose p {
-  @apply leading-relaxed text-gray-700;
+  line-height: 1.75;
+  color: #374151;
 }
 
 .prose ul,
 .prose ol {
-  @apply my-4 ml-6 list-disc list-decimal text-gray-700;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style-position: outside;
 }
 
 .prose li {
-  @apply mb-2;
+  margin-bottom: 0.5rem;
 }
 
 .prose blockquote {
-  @apply border-l-4 border-emerald-500 pl-4 bg-emerald-50 italic text-gray-800;
+  border-left: 4px solid #10b981;
+  padding-left: 1rem;
+  background-color: #ecfdf5;
+  font-style: italic;
+  color: #1f2937;
 }
 
 .prose strong {
-  @apply text-emerald-900;
+  color: #065f46;
 }
 
 .prose em {
-  @apply text-emerald-600 italic;
-}
-
-.prose img {
-  @apply rounded-lg shadow-md mt-4 mb-4;
-}
-
-.prose hr {
-  @apply my-8 border-t-2 border-emerald-100;
+  color: #047857;
+  font-style: italic;
 }
 </style>

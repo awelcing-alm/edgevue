@@ -1,30 +1,27 @@
 <template>
   <nav class="nav-container">
     <div class="nav-content">
-      <!-- Logo Section -->
+      <!-- Logo -->
       <div class="logo">
-        <NuxtLink to="/" class="logo-link">
+        <NuxtLink to="/" class="text-2xl font-bold tracking-wider text-emerald-50">
           🦎 NEWTS' NEWS
         </NuxtLink>
       </div>
 
       <!-- Navigation Links -->
       <div class="nav-links">
-        <NuxtLink class="nav-link" to="/category/lizards" :class="{ active: isActive('/category/lizards') }">LIZARDS</NuxtLink>
-        <NuxtLink class="nav-link" to="/category/snakes" :class="{ active: isActive('/category/snakes') }">SNAKES</NuxtLink>
-        <NuxtLink class="nav-link" to="/category/salamanders" :class="{ active: isActive('/category/salamanders') }">SALAMANDERS</NuxtLink>
-      </div>
+        <NuxtLink class="nav-link" to="/category/lizards">LIZARDS</NuxtLink>
+        <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
+        <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
 
-      <!-- User State: Auth Links -->
-      <div class="auth-links">
+        <!-- Auth State Links -->
         <div v-if="isAuthenticated" class="flex items-center gap-4">
-          <span class="welcome-text">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
+          <span class="text-geckoOrange font-semibold">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
           <NuxtLink class="nav-link" to="/account">MY ACCOUNT</NuxtLink>
-          <button @click="logout" class="nav-link logout-button">LOGOUT</button>
+          <button @click="logout" class="nav-link text-red-400 hover:text-red-300">LOGOUT</button>
         </div>
-        <div v-else class="flex items-center gap-4">
-          <NuxtLink class="nav-link register-button" to="/register">REGISTER</NuxtLink>
-          <NuxtLink class="nav-link" to="/login">LOGIN</NuxtLink>
+        <div v-else>
+          <NuxtLink class="nav-link register-button" to="/auth">SIGN IN</NuxtLink>
         </div>
       </div>
     </div>
@@ -33,20 +30,16 @@
 
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth';
-import { useRoute } from 'vue-router'; // To highlight active links
-
 const auth = useAuth();
-const route = useRoute();
-const isAuthenticated = computed(() => !!auth.user?.jwt);
 
-// Utility to check if the current route matches
-const isActive = (path: string): boolean => route.path.startsWith(path);
+const isAuthenticated = computed(() => !!auth.user?.jwt); // Check if the user is authenticated
 
 function logout() {
   auth.logout();
-  window.location.href = '/'; // Redirect after logout
+  window.location.href = '/'; // Redirect to homepage after logout
 }
 </script>
+
 
 <style scoped>
 /* Navigation Container */

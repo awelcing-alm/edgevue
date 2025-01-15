@@ -1,26 +1,35 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-interface AuthUser {
-  name: string;
-  email: string;
-  jwt?: string; // Include JWT
-}
-
 export const useAuth = defineStore('auth', () => {
-  const user = ref<AuthUser | null>(null); // User can be null initially
+  const user = ref<{ name: string; email: string; jwt?: string } | null>(null);
 
-  const login = (name: string, email: string, jwt: string) => {
-    user.value = { name, email, jwt }; // Set JWT during login
-  };
+  // Login method
+  function login(name: string, email: string, jwt: string) {
+    user.value = { name, email, jwt };
+    localStorage.setItem('authToken', jwt); // Cache the JWT for session persistence
+  }
 
-  const logout = () => {
-    user.value = null; // Clear user data on logout
-  };
+  // Logout method
+  function logout() {
+    user.value = null;
+    localStorage.removeItem('authToken');
+  }
 
-  return {
-    user,
-    login,
-    logout,
-  };
+  // Fetch User Profile (New method)
+  async function fetchUserProfile() {
+    const jwt = localStorage.getItem('authToken');
+    if (!jwt) return;
+
+    // Simulate a profile fetch (replace with real API call if necessary)
+    const response = await new Promise((resolve) =>
+      setTimeout(() => resolve({ name: 'Lizard King', email: 'king@scales.com', jwt }), 500)
+    );
+
+    if (response) {
+      user.value = response as { name: string; email: string; jwt: string };
+    }
+  }
+
+  return { user, login, logout, fetchUserProfile };
 });
