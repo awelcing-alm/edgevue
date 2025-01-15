@@ -83,7 +83,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .article-wrapper {
   border: 1px solid #e5e7eb;
   position: relative;
