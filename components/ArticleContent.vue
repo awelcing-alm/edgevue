@@ -1,32 +1,15 @@
 <template>
   <ClientOnly>
-    <!-- Explicitly define the article wrapper with an ID for targeting in Zephr Console -->
-    <article id="zephr-article-content" class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
+    <article v-if="!isLoading" class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
       <p v-if="isBlocked" class="text-red-600 text-center">
         This content is restricted. Please sign in to access.
       </p>
-
-      <!-- Render Article Content -->
       <div v-else>
         <h1 class="text-4xl font-extrabold text-center text-geckoOrange mb-6">{{ doc.title }}</h1>
-        <ContentRenderer :value="doc.body">
-          <template #default="{ value }">
-            <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-              <component :is="node.tag" v-bind="node.props">
-                <template v-for="(child, idx) in node.children || []" :key="idx">
-                  <span v-if="child.type === 'text'">{{ child.value }}</span>
-                </template>
-              </component>
-            </div>
-          </template>
-        </ContentRenderer>
+        <ContentRenderer :value="doc.body" />
       </div>
     </article>
-
-    <!-- Placeholder shown while loading -->
-    <div v-if="isLoading" class="loading-placeholder">
-      <p class="text-center text-gray-500">Loading article...</p>
-    </div>
+    <p v-else class="text-gray-500 text-center">Loading article...</p>
   </ClientOnly>
 </template>
 
@@ -45,38 +28,58 @@ defineProps({
   },
 });
 
-// Handle Zephr Decision Logic
-function handleZephrDecision() {
-  const outcomes: Record<string, { outcomeLabel: string }> = window.Zephr?.outcomes || {};
-  const featureKey = Object.keys(outcomes)[0] ?? '';
-
-  if (!featureKey || !outcomes[featureKey]) {
-    isBlocked.value = true;
-    isLoading.value = false;
-    return;
-  }
-
-  const decision = outcomes[featureKey] as { outcomeLabel: string };
-  isBlocked.value = decision.outcomeLabel !== 'allow';
-  isLoading.value = false;
+// Add the correct type definition
+interface ZephrDecision {
+  outcomes?: Record<string, { outcomeLabel: string }>;
+  featureResults?: Record<string, string>; // Correct type for featureResults
+  accessDetails?: {
+    authenticated?: boolean;
+  };
 }
 
-onMounted(() => {
-  // Show content instantly if the user is logged in
-  if (auth.user?.jwt) {
-    console.log('Authenticated user detected: Showing article content instantly.');
+function handleZephrDecision() {
+  const decisionData = (window.Zephr || {}) as ZephrDecision;
+  const featureResults = decisionData.featureResults || {}; // Access featureResults safely
+  const accessDetails = decisionData.accessDetails || {};
+
+  console.log('%c[Zephr] Decision Data:', 'color: #4ade80;', decisionData);
+
+  // If authenticated, allow content
+  if (accessDetails.authenticated) {
+    console.log('%c[Zephr] User is authenticated. Showing content.', 'color: #10b981;');
     isBlocked.value = false;
     isLoading.value = false;
     return;
   }
 
-  // For unauthenticated users, wait for Zephr decision
+  // Check the "edge-integration" decision
+  const featureOutcome = featureResults['edge-integration'];
+
+  if (featureOutcome && featureOutcome.includes('leave_pristine')) {
+    console.log('%c[Zephr] Outcome indicates unrestricted content.', 'color: #10b981;');
+    isBlocked.value = false;
+  } else {
+    console.warn('%c[Zephr] Outcome indicates restricted content.', 'color: #f87171;');
+    isBlocked.value = true;
+  }
+
+  isLoading.value = false;
+}
+
+onMounted(() => {
+  if (auth.user?.jwt) {
+    console.log('%c[Zephr] Authenticated user detected. Loading article directly.', 'color: #10b981;');
+    isBlocked.value = false;
+    isLoading.value = false;
+    return;
+  }
+
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
-    console.log('Waiting for Zephr decision...');
+    console.log('%c[Zephr] Running Zephr decision...', 'color: #4ade80;');
     window.zephrBrowser.run({
-      jwt: '', // Empty JWT for anonymous users
+      jwt: '', // Empty for anonymous users
       debug: true,
     });
   }
