@@ -42,6 +42,26 @@ defineProps({
   },
 });
 
+function handleZephrDecision() {
+  const zephrData = window.Zephr as unknown as { featureResults?: Record<string, string> }; // Explicit type casting
+  const outcomes = zephrData.featureResults || {}; // Access featureResults safely
+  const featureKey = 'edge-integration'; // Static key
+
+  if (!outcomes[featureKey]) {
+    console.warn('[Zephr] No decision for featureKey.');
+    isBlocked.value = true; // Block if no valid outcome
+    isLoading.value = false;
+    return;
+  }
+
+  const featureResult = outcomes[featureKey];
+  console.log('[Zephr] Feature Result:', featureResult);
+
+  // Check the feature result string to allow content
+  isBlocked.value = !featureResult.includes('Show all content'); // Block if outcome does not allow content
+  isLoading.value = false;
+}
+
 onMounted(() => {
   // If authenticated, show content instantly
   if (auth.user?.jwt) {
@@ -50,6 +70,9 @@ onMounted(() => {
     isLoading.value = false;
     return;
   }
+
+  // Wait for Zephr decision for unauthenticated users
+  document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
     console.log('[Zephr] Running Zephr browser for article decision...');
