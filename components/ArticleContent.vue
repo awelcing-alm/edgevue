@@ -1,11 +1,11 @@
 <template>
   <ClientOnly>
-    <article
-      v-if="!isLoading"
-      id="zephr-article-content"
-      class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8"
-    >
-      <!-- Render article content properly using ContentRenderer slots -->
+    <article v-if="!isLoading" id="zephr-article-content" class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
+      <p v-if="isBlocked" class="text-red-600 text-center">
+        This content is restricted. Please sign in to access.
+      </p>
+
+      <!-- Render Article Content -->
       <ContentRenderer v-else :value="doc.body">
         <template #default="{ value }">
           <div v-for="(node, index) in value.children" :key="index" class="mb-4">
@@ -42,45 +42,19 @@ defineProps({
   },
 });
 
-// Extend the Zephr outcomes type to include featureResults
-type ZephrOutcomes = {
-  outcomes?: Record<string, { outcomeLabel: string }>;
-  featureResults?: Record<string, string>; // Add featureResults explicitly
-  accessDetails?: any;
-};
-
-// Use the type when accessing window.Zephr
-const handleZephrDecision = () => {
-  const zephrOutcome: ZephrOutcomes = window.Zephr || {};
-  
-  if (!zephrOutcome.featureResults) {
-    console.warn('No featureResults found from Zephr.');
-    isBlocked.value = true;
+onMounted(() => {
+  // If authenticated, show content instantly
+  if (auth.user?.jwt) {
+    console.log('[Zephr] Authenticated user detected: showing content.');
+    isBlocked.value = false;
     isLoading.value = false;
     return;
   }
 
-  // Example feature key for your implementation
-  const featureKey = 'edge-integration';
-  const featureResult = zephrOutcome.featureResults[featureKey];
-
-  if (featureResult?.includes('Show all content')) {
-    console.log('[Zephr] Outcome allows content.');
-    isBlocked.value = false;
-  } else {
-    console.warn('[Zephr] Outcome restricts content.');
-    isBlocked.value = true;
-  }
-  isLoading.value = false;
-};
-
-
-onMounted(() => {
-  document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
-
   if (window.zephrBrowser?.run) {
+    console.log('[Zephr] Running Zephr browser for article decision...');
     window.zephrBrowser.run({
-      jwt: auth.user?.jwt || '',
+      jwt: '', // Empty JWT for anonymous
       debug: true,
     });
   }
