@@ -1,9 +1,9 @@
 <template>
   <nav class="nav-container">
     <div class="nav-content">
-      <!-- Logo Section -->
+      <!-- Logo -->
       <div class="logo">
-        <NuxtLink to="/" class="logo-link">
+        <NuxtLink to="/" class="text-2xl font-bold tracking-wider text-emerald-50">
           🦎 NEWTS' NEWS
         </NuxtLink>
       </div>
@@ -14,13 +14,10 @@
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
 
-        <!-- Auth State -->
-        <div v-if="isAuthenticated" class="auth-links flex items-center gap-4">
-          <span class="welcome-text">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
-          <button @click="logout" class="logout-button">LOGOUT</button>
-        </div>
-        <div v-else>
-          <NuxtLink class="nav-link register-button" to="/auth">SIGN IN</NuxtLink>
+        <!-- Authentication Links -->
+        <div class="auth-links">
+          <SignOutButton v-if="isAuthenticated" />
+          <SignInButton v-else />
         </div>
       </div>
     </div>
@@ -28,20 +25,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useAuth } from '~/composables/useAuth';
+import SignInButton from '~/components/SignInButton.vue';
+import SignOutButton from '~/components/SignOutButton.vue';
 
 const auth = useAuth();
 const isAuthenticated = computed(() => !!auth.user?.jwt);
-
-function logout() {
-  auth.logout();
-  if (window.zephrBrowser?.run) {
-    console.log('%c[Zephr] Resetting session for anonymous user.', 'color: #f87171;');
-    window.zephrBrowser.run({ jwt: '' });
-  }
-  window.location.href = '/'; // Redirect to homepage after logout
-}
 </script>
 
 <style scoped>

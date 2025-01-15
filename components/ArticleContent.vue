@@ -139,15 +139,19 @@ onMounted(() => {
   color: #2b6cb0;
 }
 
-.prose ul,
+.prose ul {
+  list-style-type: disc; /* Restore normal bullet points */
+  padding-left: 1.5rem; /* Add some padding for indentation */
+}
+
 .prose ol {
-  margin: 1.5rem 0;
+  list-style-type: decimal; /* Use numbers for ordered lists */
   padding-left: 1.5rem;
 }
 
 .prose li {
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
+  margin-bottom: 0.5rem; /* Spacing between list items */
+  line-height: 1.6;
 }
 
 .prose strong {
