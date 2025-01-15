@@ -1,7 +1,4 @@
-import type { Pinia } from 'pinia'; // Use type-only import
-import { useAuth } from '@/composables/useAuth'; // Import the composable
-
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(() => {
   const loadZephrScript = () => {
     return new Promise((resolve, reject) => {
       if (document.getElementById('zephr-script')) {
@@ -25,24 +22,21 @@ export default defineNuxtPlugin((nuxtApp) => {
   };
 
   if (process.client) {
-    loadZephrScript()
-      .then(() => {
-        if (!window.zephrBrowser) {
-          console.warn('Zephr browser is not loaded.');
-          return;
-        }
+    loadZephrScript().then(() => {
+      if (!window.zephrBrowser) {
+        console.warn('Zephr browser is not loaded.');
+        return;
+      }
 
-        const pinia = nuxtApp.$pinia as Pinia; // Explicitly cast to Pinia
-        const auth = useAuth(pinia);
-        const jwtToken = auth.jwt ?? '';
+      document.addEventListener('zephr.dataLayerReady', () => {
+        console.log('Zephr data layer ready.');
 
-        window.zephrBrowser.run({
-          jwt: jwtToken,
-          debug: true, // Enable debug mode
+        // Register custom event listener for registration success
+        document.addEventListener('lzregister-success', () => {
+          console.log('Registration successful! Redirecting...');
+          window.location.href = '/'; // Redirect to home page
         });
-      })
-      .catch((error) => {
-        console.error('Error loading Zephr script:', error);
       });
+    });
   }
 });
