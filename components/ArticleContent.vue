@@ -1,22 +1,28 @@
 <template>
   <ClientOnly>
-    <article id="zephr-article-content">
-    <ContentRenderer v-else :value="doc.body">
-        <template #default="{ value }">
-          <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-            <component :is="node.tag" v-bind="node.props">
-              <template v-for="(child, idx) in node.children || []" :key="idx">
-                <span v-if="child.type === 'text'">{{ child.value }}</span>
-                <component v-else :is="child.tag" v-bind="child.props">
-                  <template v-for="(innerChild, i) in child.children || []" :key="i">
-                    <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                  </template>
-                </component>
-              </template>
-            </component>
-          </div>
-        </template>
-      </ContentRenderer>
+    <article id="zephr-article-content" class="article-wrapper">
+      <template v-if="!isLoading">
+        <p v-if="isBlocked" class="text-red-600 text-center">
+          This content is restricted. Please sign in to access.
+        </p>
+        <ContentRenderer v-else :value="doc.body">
+          <template #default="{ value }">
+            <div v-for="(node, index) in value.children" :key="index" class="mb-4">
+              <component :is="node.tag" v-bind="node.props">
+                <template v-for="(child, idx) in node.children || []" :key="idx">
+                  <span v-if="child.type === 'text'">{{ child.value }}</span>
+                  <component v-else :is="child.tag" v-bind="child.props">
+                    <template v-for="(innerChild, i) in child.children || []" :key="i">
+                      <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
+                    </template>
+                  </component>
+                </template>
+              </component>
+            </div>
+          </template>
+        </ContentRenderer>
+      </template>
+      <p v-else class="loading-placeholder">Loading article...</p>
     </article>
   </ClientOnly>
 </template>
@@ -36,10 +42,9 @@ defineProps({
   },
 });
 
-// Add the correct type definition
 interface ZephrDecision {
   outcomes?: Record<string, { outcomeLabel: string }>;
-  featureResults?: Record<string, string>; // Correct type for featureResults
+  featureResults?: Record<string, string>;
   accessDetails?: {
     authenticated?: boolean;
   };
@@ -47,27 +52,22 @@ interface ZephrDecision {
 
 function handleZephrDecision() {
   const decisionData = (window.Zephr || {}) as ZephrDecision;
-  const featureResults = decisionData.featureResults || {}; // Access featureResults safely
+  const featureResults = decisionData.featureResults || {};
   const accessDetails = decisionData.accessDetails || {};
 
   console.log('%c[Zephr] Decision Data:', 'color: #4ade80;', decisionData);
 
-  // If authenticated, allow content
   if (accessDetails.authenticated) {
-    console.log('%c[Zephr] User is authenticated. Showing content.', 'color: #10b981;');
     isBlocked.value = false;
     isLoading.value = false;
     return;
   }
 
-  // Check the "edge-integration" decision
   const featureOutcome = featureResults['edge-integration'];
 
   if (featureOutcome && featureOutcome.includes('leave_pristine')) {
-    console.log('%c[Zephr] Outcome indicates unrestricted content.', 'color: #10b981;');
     isBlocked.value = false;
   } else {
-    console.warn('%c[Zephr] Outcome indicates restricted content.', 'color: #f87171;');
     isBlocked.value = true;
   }
 
@@ -76,7 +76,6 @@ function handleZephrDecision() {
 
 onMounted(() => {
   if (auth.user?.jwt) {
-    console.log('%c[Zephr] Authenticated user detected. Loading article directly.', 'color: #10b981;');
     isBlocked.value = false;
     isLoading.value = false;
     return;
@@ -85,16 +84,15 @@ onMounted(() => {
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
-    console.log('%c[Zephr] Running Zephr decision...', 'color: #4ade80;');
     window.zephrBrowser.run({
-      jwt: '', // Empty for anonymous users
+      jwt: '',
       debug: true,
     });
   }
 });
 </script>
 
-<style>
+<style scoped>
 .article-wrapper {
   border: 1px solid #e5e7eb;
   position: relative;
