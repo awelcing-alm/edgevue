@@ -14,14 +14,14 @@
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
 
-        <!-- Auth State Links -->
+        <!-- Auth State -->
         <div v-if="isAuthenticated" class="flex items-center gap-4">
           <span class="text-geckoOrange font-semibold">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
           <NuxtLink class="nav-link" to="/account">MY ACCOUNT</NuxtLink>
           <button @click="logout" class="nav-link text-red-400 hover:text-red-300">LOGOUT</button>
         </div>
         <div v-else>
-          <NuxtLink class="nav-link register-button" to="/auth">SIGN IN</NuxtLink>
+          <NuxtLink class="nav-link register-button" to="/authPage">SIGN IN</NuxtLink>
         </div>
       </div>
     </div>
@@ -32,13 +32,14 @@
 import { useAuth } from '~/composables/useAuth';
 const auth = useAuth();
 
-const isAuthenticated = computed(() => !!auth.user?.jwt); // Check if the user is authenticated
+const isAuthenticated = computed(() => !!auth.user?.jwt);
 
 function logout() {
   auth.logout();
   window.location.href = '/'; // Redirect to homepage after logout
 }
 </script>
+
 
 
 <style scoped>

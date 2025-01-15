@@ -48,10 +48,10 @@
   
     // Handle form success and redirect to homepage
     document.addEventListener('zephr.formSuccess', () => {
-      console.log('Form submission successful! Redirecting...');
-      auth.fetchUserProfile(); // Update the auth store after login
-      router.push('/');
-    });
+  console.log('Form submission successful! Redirecting to homepage...');
+  auth.login('User', 'user@example.com', 'your-jwt-token-here'); // Example login
+  router.push('/');
+});
   });
   </script>
   
