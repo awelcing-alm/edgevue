@@ -1,12 +1,7 @@
 <template>
   <ClientOnly>
-    <article v-if="!isLoading" id="zephr-article-content" class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
-      <p v-if="isBlocked" class="text-red-600 text-center">
-        This content is restricted. Please sign in to access.
-      </p>
-
-      <!-- Render Article Content -->
-      <ContentRenderer v-else :value="doc.body">
+    <article id="zephr-article-content">
+    <ContentRenderer v-else :value="doc.body">
         <template #default="{ value }">
           <div v-for="(node, index) in value.children" :key="index" class="mb-4">
             <component :is="node.tag" v-bind="node.props">
@@ -23,7 +18,6 @@
         </template>
       </ContentRenderer>
     </article>
-    <p v-else class="text-gray-500 text-center">Loading article...</p>
   </ClientOnly>
 </template>
 
@@ -42,42 +36,58 @@ defineProps({
   },
 });
 
-function handleZephrDecision() {
-  const zephrData = window.Zephr as unknown as { featureResults?: Record<string, string> }; // Explicit type casting
-  const outcomes = zephrData.featureResults || {}; // Access featureResults safely
-  const featureKey = 'edge-integration'; // Static key
-
-  if (!outcomes[featureKey]) {
-    console.warn('[Zephr] No decision for featureKey.');
-    isBlocked.value = true; // Block if no valid outcome
-    isLoading.value = false;
-    return;
-  }
-
-  const featureResult = outcomes[featureKey];
-  console.log('[Zephr] Feature Result:', featureResult);
-
-  // Check the feature result string to allow content
-  isBlocked.value = !featureResult.includes('Show all content'); // Block if outcome does not allow content
-  isLoading.value = false;
+// Add the correct type definition
+interface ZephrDecision {
+  outcomes?: Record<string, { outcomeLabel: string }>;
+  featureResults?: Record<string, string>; // Correct type for featureResults
+  accessDetails?: {
+    authenticated?: boolean;
+  };
 }
 
-onMounted(() => {
-  // If authenticated, show content instantly
-  if (auth.user?.jwt) {
-    console.log('[Zephr] Authenticated user detected: showing content.');
+function handleZephrDecision() {
+  const decisionData = (window.Zephr || {}) as ZephrDecision;
+  const featureResults = decisionData.featureResults || {}; // Access featureResults safely
+  const accessDetails = decisionData.accessDetails || {};
+
+  console.log('%c[Zephr] Decision Data:', 'color: #4ade80;', decisionData);
+
+  // If authenticated, allow content
+  if (accessDetails.authenticated) {
+    console.log('%c[Zephr] User is authenticated. Showing content.', 'color: #10b981;');
     isBlocked.value = false;
     isLoading.value = false;
     return;
   }
 
-  // Wait for Zephr decision for unauthenticated users
+  // Check the "edge-integration" decision
+  const featureOutcome = featureResults['edge-integration'];
+
+  if (featureOutcome && featureOutcome.includes('leave_pristine')) {
+    console.log('%c[Zephr] Outcome indicates unrestricted content.', 'color: #10b981;');
+    isBlocked.value = false;
+  } else {
+    console.warn('%c[Zephr] Outcome indicates restricted content.', 'color: #f87171;');
+    isBlocked.value = true;
+  }
+
+  isLoading.value = false;
+}
+
+onMounted(() => {
+  if (auth.user?.jwt) {
+    console.log('%c[Zephr] Authenticated user detected. Loading article directly.', 'color: #10b981;');
+    isBlocked.value = false;
+    isLoading.value = false;
+    return;
+  }
+
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
-    console.log('[Zephr] Running Zephr browser for article decision...');
+    console.log('%c[Zephr] Running Zephr decision...', 'color: #4ade80;');
     window.zephrBrowser.run({
-      jwt: '', // Empty JWT for anonymous
+      jwt: '', // Empty for anonymous users
       debug: true,
     });
   }
