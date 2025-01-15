@@ -5,10 +5,6 @@
       id="zephr-article-content"
       class="article-wrapper prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8"
     >
-      <p v-if="isBlocked" class="text-red-600 text-center">
-        This content is restricted. Please sign in to access.
-      </p>
-
       <!-- Render article content properly using ContentRenderer slots -->
       <ContentRenderer v-else :value="doc.body">
         <template #default="{ value }">
