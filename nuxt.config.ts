@@ -77,6 +77,10 @@ export default defineNuxtConfig({
           async: true,
         },
         {
+          src: 'https://assets.zephr.com/zephr-browser/1.9.1/zephr-browser.umd.js',
+          async: true,
+        },
+        {
           children: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

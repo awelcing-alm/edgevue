@@ -46,18 +46,19 @@ function handleZephrDecision() {
   const featureKey = Object.keys(outcomes)[0] ?? '';
 
   if (!featureKey || !outcomes[featureKey]) {
+    console.warn('%c[Zephr] No outcomes found. Blocking content by default.', 'color: #f87171;');
     isBlocked.value = true;
     isLoading.value = false;
     return;
   }
 
   const decision = outcomes[featureKey] as { outcomeLabel: string };
+  console.log(`%c[Zephr] Article decision: ${decision.outcomeLabel}`, 'color: #4ade80;');
   isBlocked.value = decision.outcomeLabel !== 'allow';
   isLoading.value = false;
 }
 
 onMounted(() => {
-  // Show content instantly if the user is logged in
   if (auth.user?.jwt) {
     console.log('Authenticated user detected: Showing article content instantly.');
     isBlocked.value = false;
@@ -65,13 +66,12 @@ onMounted(() => {
     return;
   }
 
-  // For unauthenticated users, wait for Zephr decision
+  console.log('Waiting for Zephr decision...');
   document.addEventListener('zephr.browserDecisionsFinished', handleZephrDecision);
 
   if (window.zephrBrowser?.run) {
-    console.log('Waiting for Zephr decision...');
     window.zephrBrowser.run({
-      jwt: '', // Empty JWT for anonymous users
+      jwt: '', // Anonymous users
       debug: true,
     });
   }
