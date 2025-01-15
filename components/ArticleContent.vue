@@ -3,6 +3,10 @@
     <div class="prose lg:prose-xl max-w-none bg-white shadow-lg rounded-lg p-8">
       <p v-if="isLoading" class="text-gray-500">Loading article...</p>
 
+      <div v-else-if="!isFeatureAllowed" class="text-red-500">
+        <p>This content is available to premium users. Please <a href="/Register" class="underline text-emerald-600">sign in</a>.</p>
+      </div>
+
       <article v-else>
         <ContentRenderer v-if="doc?.body" :value="doc.body" />
         <p v-else class="text-gray-500">No content found.</p>
@@ -12,48 +16,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
+import { useZephrFeature } from '~/composables/useZephrFeature';
 
-interface ContentDocument {
-  body?: {
-    children: Array<Record<string, any>>;
-  };
-  [key: string]: any;
-}
+defineProps<{ doc: Record<string, any> }>();
 
-defineProps<{ doc: ContentDocument }>();
+const { isFeatureAllowed, isLoading, evaluateFeature } = useZephrFeature();
 
-const isLoading = ref(true); // Track loading state
-const isBlocked = ref(false); // Track blocked content
-
-function evaluateFeature() {
-  if (window.Zephr && window.Zephr.run) {
-    window.Zephr.run({
-      customData: { featureCheck: 'articleAccess' },
-      onSuccess: () => {
-        const featureOutcome = window.Zephr.outcomes?.['articleContent'];
-        if (featureOutcome?.outcomeLabel === 'allow') {
-          isBlocked.value = false; // Allow the content
-        } else {
-          isBlocked.value = true; // Block the content
-        }
-        isLoading.value = false; // Stop the loading indicator
-      },
-      onFailure: () => {
-        console.warn('Zephr feature decision failed.');
-        isBlocked.value = true; // Default to blocked if there’s a failure
-        isLoading.value = false;
-      },
-    });
-  } else {
-    console.error('Zephr is not loaded. Please check your configuration.');
-    isBlocked.value = true;
-    isLoading.value = false;
-  }
-}
-
+// Run the feature decision on mount
 onMounted(() => {
-  evaluateFeature(); // Run Zephr feature check on component mount
+  evaluateFeature('articleContent'); // Pass the Zephr feature ID
 });
 </script>
 
