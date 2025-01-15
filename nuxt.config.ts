@@ -15,7 +15,6 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/ga.client.ts', // Google Analytics client-side plugin
     '~/plugins/zephr-datalayer.client.ts', // Zephr script plugin
-    '~/plugins/zephr.client.ts', // Zephr client-side plugin
   ],
 
   // Enable component and auto-imports globally
