@@ -1,11 +1,16 @@
 declare global {
   interface Window {
-    [key: string]: any[]; // Allow window to have string-indexed arrays
+    [key: string]: any[]; // Allows string-indexed properties to be arrays
     Zephr?: {
       outcomes?: Record<string, { outcomeLabel: string }>;
       accessDetails?: any;
     };
   }
+}
+
+interface PageViewEvent {
+  zephrOutcomes?: Record<string, { outcomeLabel: string }>;
+  [key: string]: any;
 }
 
 export default defineNuxtPlugin(() => {
@@ -16,7 +21,7 @@ export default defineNuxtPlugin(() => {
     xhr.open('GET', '/blaize/datalayer', true);
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        let response: Record<string, any>;
+        let response: Record<string, PageViewEvent>;
         try {
           response = JSON.parse(xhr.responseText);
         } catch (e) {
@@ -26,19 +31,23 @@ export default defineNuxtPlugin(() => {
 
         if (xhr.status === 200) {
           Object.entries(response).forEach(([dataLayerFieldName, pageView]) => {
-            if (!(dataLayerFieldName in window)) {
-              window[dataLayerFieldName] = []; // Now explicitly typed as an array
+            if (typeof dataLayerFieldName !== 'string') return; // Type guard
+
+            // Ensure that `window[dataLayerFieldName]` is typed as an array of `PageViewEvent`
+            if (!Array.isArray(window[dataLayerFieldName])) {
+              window[dataLayerFieldName] = []; // Initialize the array if not already
             }
-            const events: any[] = [];
+            const events: Array<Record<string, any>> = [];
 
             if (window.Zephr?.outcomes) {
               pageView.zephrOutcomes = window.Zephr.outcomes ?? {}; // Provide an empty object as fallback
-              Object.entries(window.Zephr.outcomes || {}).forEach(([outcomeKey, outcomeValue]) => {
+              Object.entries(window.Zephr.outcomes).forEach(([outcomeKey, outcomeValue]) => {
                 events.push({ event: `zephr-outcome-${outcomeKey}`, ...outcomeValue });
               });
             }
 
-            window[dataLayerFieldName].push(pageView);
+            // Push pageView into the window's data layer array
+            (window[dataLayerFieldName] as PageViewEvent[]).push(pageView);
           });
 
           const readyEvent = new Event('zephr.dataLayerReady');

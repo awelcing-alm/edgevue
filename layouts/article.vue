@@ -24,7 +24,7 @@
         </a>.
       </p>
       <p class="mt-4 text-sm text-gray-500">
-        🦎 Copyright © 2025 - Lizard Lounge
+        🦎 Copyright © 2025 - ALM
       </p>
     </footer>
   </div>
