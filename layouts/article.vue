@@ -4,10 +4,7 @@
     <TopNav />
 
     <main class="container mx-auto px-4 py-12">
-      <h1 class="text-center text-4xl font-extrabold text-iguanaGreen mb-6 drop-shadow-md">
-        🦎 Read on, Fellow Lizard Enthusiast!
-      </h1>
-      <div class="rounded-lg bg-white shadow-lg p-6 ring-1 ring-gray-200 hover:ring-geckoOrange transition">
+      <div class="rounded-lg shadow-lg p-6 ring-1 ring-gray-200 hover:ring-geckoOrange transition">
         <slot /> <!-- Slot to render the article content -->
       </div>
     </main>
