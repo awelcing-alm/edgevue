@@ -7,6 +7,8 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxtjs/tailwindcss',
     '@nuxthq/studio',
+    '@vueuse/motion/nuxt',
+    '@pinia/nuxt'
   ],
 
   // Plugins
@@ -57,6 +59,7 @@ export default defineNuxtConfig({
   // Tailwind CSS configuration (extend colors and typography)
   tailwindcss: {
     cssPath: '~/assets/css/tailwind.css',
+    configPath: 'tailwind.config.ts', // Tell Nuxt where to find the custom config
   },
 
   // Application meta and headers

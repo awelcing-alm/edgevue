@@ -1,4 +1,6 @@
-export default defineNuxtPlugin(() => {
+import { useAuth } from '@/composables/useAuth'; // Import the useAuth composable
+
+export default defineNuxtPlugin((nuxtApp) => {
   const loadZephrScript = () => {
     return new Promise((resolve, reject) => {
       if (document.getElementById('zephr-script')) {
@@ -29,12 +31,13 @@ export default defineNuxtPlugin(() => {
           return;
         }
 
-        // Provide a JWT as required by the type definition
-        const jwtToken = 'your-valid-jwt-here'; // Replace with real JWT or fetch dynamically if needed
+        // Access Pinia's auth store through the Nuxt app context
+        const auth = useAuth(nuxtApp.$pinia); // Pass in the Pinia store instance
+        const jwtToken = auth.jwt ?? '';
 
         window.zephrBrowser.run({
-          jwt: jwtToken, // JWT is required according to the type definition
-          customData: {}, // Optional field, leave empty or add user-specific data if needed
+          jwt: jwtToken,
+          debug: true, // Enable debug mode for local testing
         });
       })
       .catch((error) => {

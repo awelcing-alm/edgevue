@@ -13,12 +13,26 @@
         <NuxtLink class="nav-link" to="/category/lizards">LIZARDS</NuxtLink>
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
+
+        <!-- Authentication Links -->
+        <div v-if="auth.isAuthenticated" class="auth-links flex items-center gap-4">
+          <span class="text-geckoOrange font-semibold">Welcome, {{ auth.user?.name || 'Explorer' }}!</span>
+          <NuxtLink class="nav-link" to="/account">ACCOUNT</NuxtLink>
+          <button @click="auth.logout" class="nav-link text-red-400 hover:text-red-300">LOGOUT</button>
+        </div>
+        <div v-else class="auth-links flex items-center gap-4">
+          <NuxtLink class="nav-link register-button bg-geckoOrange text-white px-3 py-1 rounded-lg hover:bg-orange-500" to="/register">REGISTER</NuxtLink>
+          <NuxtLink class="nav-link" to="/login">LOGIN</NuxtLink>
+        </div>
       </div>
     </div>
   </nav>
 </template>
 
-
+<script setup lang="ts">
+import { useAuth } from '@/composables/useAuth'; // Import auth composable
+const auth = useAuth(); // Use the Pinia store for auth state
+</script>
 
 <style scoped>
 /* Navigation Container */
@@ -73,6 +87,11 @@
 
 .nav-link.register-button {
   font-weight: bold;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+}
+
+.nav-link.register-button:hover {
+  transform: scale(1.05);
 }
 
 .nav-link.active {
