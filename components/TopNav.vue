@@ -13,6 +13,7 @@
         <NuxtLink class="nav-link" to="/category/lizards">LIZARDS</NuxtLink>
         <NuxtLink class="nav-link" to="/category/snakes">SNAKES</NuxtLink>
         <NuxtLink class="nav-link" to="/category/salamanders">SALAMANDERS</NuxtLink>
+        <NuxtLink class="nav-link" to="/stats">STATS</NuxtLink>
 
         <!-- Authentication Links -->
         <div class="auth-links">
