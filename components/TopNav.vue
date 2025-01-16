@@ -16,8 +16,7 @@
 
         <!-- Authentication Links -->
         <div class="auth-links">
-          <SignOutButton v-if="isAuthenticated" />
-          <SignInButton v-else />
+          <SignInButton />
         </div>
       </div>
     </div>
@@ -26,8 +25,7 @@
 
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth';
-import SignInButton from '~/components/SignInButton.vue';
-import SignOutButton from '~/components/SignOutButton.vue';
+import SignInButton from '~/components/SignInStatus.vue';
 
 const auth = useAuth();
 const isAuthenticated = computed(() => !!auth.user?.jwt);
