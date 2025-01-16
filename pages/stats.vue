@@ -1,68 +1,4 @@
-<template>
-  <NuxtLayout name="default">
-    <ClientOnly>
-      <div v-if="!isLoading" class="max-w-6xl mx-auto py-12 px-6">
-        <div v-if="hasAccess">
-          <!-- Main Page Content -->
-          <h1 class="text-4xl font-bold mb-8 text-emerald-900">
-            Population Statistics
-          </h1>
-          <div class="grid gap-8">
-            <!-- Population Distribution -->
-            <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
-              <h2 class="text-2xl font-bold mb-6 text-emerald-800">
-                Global Population Distribution
-              </h2>
-              <div class="h-[300px]">
-                <Bar :data="chartData" :options="barChartOptions" />
-              </div>
-            </div>
-            <!-- Population Trends -->
-            <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
-              <h2 class="text-2xl font-bold mb-6 text-emerald-800">
-                Population Trends (Last 5 Years)
-              </h2>
-              <div class="h-[300px]">
-                <Line :data="trendData" :options="lineChartOptions" />
-              </div>
-            </div>
-            <!-- Key Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="bg-emerald-800 text-emerald-50 p-6 rounded-lg">
-                <h3 class="text-xl font-semibold mb-2">Lizard Species</h3>
-                <p class="text-4xl font-bold">6,000+</p>
-                <p class="text-emerald-200 mt-2">Known species worldwide</p>
-              </div>
-              <div class="bg-blue-800 text-blue-50 p-6 rounded-lg">
-                <h3 class="text-xl font-semibold mb-2">Salamander Species</h3>
-                <p class="text-4xl font-bold">750+</p>
-                <p class="text-blue-200 mt-2">Known species worldwide</p>
-              </div>
-              <div class="bg-amber-700 text-amber-50 p-6 rounded-lg">
-                <h3 class="text-xl font-semibold mb-2">Snake Species</h3>
-                <p class="text-4xl font-bold">3,000+</p>
-                <p class="text-amber-200 mt-2">Known species worldwide</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Access Denied Block -->
-        <div v-else class="bg-red-100 text-red-700 p-8 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold">Access Denied</h2>
-          <p class="mt-4">
-            You do not have permission to view this content. Please contact support
-            or upgrade your account.
-          </p>
-        </div>
-      </div>
-      <p v-else class="text-gray-500 text-center">Loading...</p>
-    </ClientOnly>
-  </NuxtLayout>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { Bar, Line } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -74,8 +10,10 @@ import {
   LinearScale,
   LineElement,
   PointElement,
+  type ChartOptions,
 } from 'chart.js';
 
+// Register chart.js components
 ChartJS.register(
   Title,
   Tooltip,
@@ -86,10 +24,6 @@ ChartJS.register(
   LineElement,
   PointElement
 );
-
-// State variables
-const hasAccess = ref(false);
-const isLoading = ref(true);
 
 // Chart data
 const chartData = {
@@ -129,53 +63,56 @@ const trendData = {
   ],
 };
 
-// Chart options
-const barChartOptions = {
+// Fix chart options by explicitly typing `legend.position`
+const chartOptions: ChartOptions<'bar'> = {
   responsive: true,
   maintainAspectRatio: true,
   aspectRatio: 2,
   plugins: {
     legend: {
-      position: 'top' as const, // Explicitly set to a valid literal type
+      position: 'top', // Explicitly use a valid value
     },
   },
 };
 
-const lineChartOptions = {
+const trendOptions: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: true,
   aspectRatio: 2,
   plugins: {
     legend: {
-      position: 'top' as const, // Explicitly set to a valid literal type
+      position: 'top', // Explicitly use a valid value
     },
   },
 };
-
-// Function to check access
-function checkAccess() {
-  const zephrAccessDetails = window.Zephr?.accessDetails;
-  const activeProducts = zephrAccessDetails?.activeProducts || [];
-  const requiredProduct = 'Gold'; // The product for access
-
-  hasAccess.value = activeProducts.includes(requiredProduct);
-  isLoading.value = false;
-}
-
-onMounted(() => {
-  if (typeof window === 'undefined') return;
-
-  // Listen for Zephr decisions
-  document.addEventListener('zephr.browserDecisionsFinished', checkAccess);
-
-  // If Zephr has already run
-  if (window.Zephr?.accessDetails) {
-    checkAccess();
-  } else if (window.zephrBrowser?.run) {
-    window.zephrBrowser.run({
-      jwt: '', // Provide a JWT if required
-      debug: true,
-    });
-  }
-});
 </script>
+
+<template>
+  <NuxtLayout name="default">
+    <div id="stats-page-content" class="max-w-6xl mx-auto py-12 px-6">
+      <h1 class="text-4xl font-bold mb-8 text-emerald-900">
+        Population Statistics
+      </h1>
+      <div class="grid gap-8">
+        <!-- Population Distribution -->
+        <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
+          <h2 class="text-2xl font-bold mb-6 text-emerald-800">
+            Global Population Distribution
+          </h2>
+          <div class="h-[300px]">
+            <Bar :data="chartData" :options="chartOptions" />
+          </div>
+        </div>
+        <!-- Population Trends -->
+        <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
+          <h2 class="text-2xl font-bold mb-6 text-emerald-800">
+            Population Trends (Last 5 Years)
+          </h2>
+          <div class="h-[300px]">
+            <Line :data="trendData" :options="trendOptions" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </NuxtLayout>
+</template>
