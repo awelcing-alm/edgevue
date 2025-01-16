@@ -133,3 +133,10 @@ const chartOptions = {
   },
 };
 </script>
+
+<style scoped>
+#stats {
+  /* Scoped styles here */
+  border-style: dotted;
+  }
+</style>
