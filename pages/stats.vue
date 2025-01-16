@@ -5,18 +5,16 @@
     <h1 class="text-4xl font-bold mb-8 text-emerald-900">
       Population Statistics
     </h1>
+    <div id="stats" class="grid gap-8">
 
     <ClientOnly>
-    <div id="stats" class="grid gap-8">
       <!-- Population Distribution -->
       <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
         <h2 class="text-2xl font-bold mb-6 text-emerald-800">
           Global Population Distribution
         </h2>
         <div class="h-[300px]">
-          <ClientOnly>
             <Bar :data="chartData" :options="chartOptions" />
-          </ClientOnly>
         </div>
       </div>
 
@@ -49,8 +47,8 @@
           <p class="text-amber-200 mt-2">Known species worldwide</p>
         </div>
       </div>
-    </div>
   </ClientOnly>
+</div>
   </div>
 </template>
 </NuxtLayout>
