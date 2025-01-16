@@ -1,4 +1,58 @@
-<script setup lang="ts">
+<template>
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8 text-emerald-900">
+      Population Statistics
+    </h1>
+
+    <ClientOnly>
+    <div id="stats" class="grid gap-8">
+      <!-- Population Distribution -->
+      <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
+        <h2 class="text-2xl font-bold mb-6 text-emerald-800">
+          Global Population Distribution
+        </h2>
+        <div class="h-[300px]">
+          <ClientOnly>
+            <Bar :data="chartData" :options="chartOptions" />
+          </ClientOnly>
+        </div>
+      </div>
+
+      <!-- Population Trends -->
+      <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
+        <h2 class="text-2xl font-bold mb-6 text-emerald-800">
+          Population Trends (Last 5 Years)
+        </h2>
+        <div class="h-[300px]">
+
+            <Line :data="trendData" :options="chartOptions" />
+        </div>
+      </div>
+
+      <!-- Key Statistics -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-emerald-800 text-emerald-50 p-6 rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">Lizard Species</h3>
+          <p class="text-4xl font-bold">6,000+</p>
+          <p class="text-emerald-200 mt-2">Known species worldwide</p>
+        </div>
+        <div class="bg-blue-800 text-blue-50 p-6 rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">Salamander Species</h3>
+          <p class="text-4xl font-bold">750+</p>
+          <p class="text-blue-200 mt-2">Known species worldwide</p>
+        </div>
+        <div class="bg-amber-700 text-amber-50 p-6 rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">Snake Species</h3>
+          <p class="text-4xl font-bold">3,000+</p>
+          <p class="text-amber-200 mt-2">Known species worldwide</p>
+        </div>
+      </div>
+    </div>
+  </ClientOnly>
+  </div>
+</template>
+
+<script setup>
 import { Bar, Line } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -10,10 +64,8 @@ import {
   LinearScale,
   LineElement,
   PointElement,
-  type ChartOptions,
 } from 'chart.js';
 
-// Register chart.js components
 ChartJS.register(
   Title,
   Tooltip,
@@ -25,14 +77,17 @@ ChartJS.register(
   PointElement
 );
 
-// Chart data
 const chartData = {
   labels: ['Lizards', 'Salamanders', 'Snakes'],
   datasets: [
     {
       label: 'Number of Species',
       data: [6000, 750, 3000],
-      backgroundColor: ['rgb(6, 95, 70)', 'rgb(30, 64, 175)', 'rgb(180, 83, 9)'],
+      backgroundColor: [
+        'rgb(6, 95, 70)',
+        'rgb(30, 64, 175)',
+        'rgb(180, 83, 9)',
+      ],
       borderColor: ['rgb(4, 120, 87)', 'rgb(29, 78, 216)', 'rgb(217, 119, 6)'],
       borderWidth: 1,
     },
@@ -63,56 +118,14 @@ const trendData = {
   ],
 };
 
-// Fix chart options by explicitly typing `legend.position`
-const chartOptions: ChartOptions<'bar'> = {
+const chartOptions = {
   responsive: true,
   maintainAspectRatio: true,
   aspectRatio: 2,
   plugins: {
     legend: {
-      position: 'top', // Explicitly use a valid value
-    },
-  },
-};
-
-const trendOptions: ChartOptions<'line'> = {
-  responsive: true,
-  maintainAspectRatio: true,
-  aspectRatio: 2,
-  plugins: {
-    legend: {
-      position: 'top', // Explicitly use a valid value
+      position: 'top',
     },
   },
 };
 </script>
-
-<template>
-  <NuxtLayout name="default">
-    <div id="stats-page-content" class="max-w-6xl mx-auto py-12 px-6">
-      <h1 class="text-4xl font-bold mb-8 text-emerald-900">
-        Population Statistics
-      </h1>
-      <div class="grid gap-8">
-        <!-- Population Distribution -->
-        <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
-          <h2 class="text-2xl font-bold mb-6 text-emerald-800">
-            Global Population Distribution
-          </h2>
-          <div class="h-[300px]">
-            <Bar :data="chartData" :options="chartOptions" />
-          </div>
-        </div>
-        <!-- Population Trends -->
-        <div class="bg-white p-8 rounded-lg shadow-lg h-[400px]">
-          <h2 class="text-2xl font-bold mb-6 text-emerald-800">
-            Population Trends (Last 5 Years)
-          </h2>
-          <div class="h-[300px]">
-            <Line :data="trendData" :options="trendOptions" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </NuxtLayout>
-</template>
