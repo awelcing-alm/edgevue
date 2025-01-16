@@ -1,4 +1,6 @@
 <template>
+    <NuxtLayout name="default">
+      <template #default>
   <div class="max-w-6xl mx-auto">
     <h1 class="text-4xl font-bold mb-8 text-emerald-900">
       Population Statistics
@@ -50,6 +52,8 @@
     </div>
   </ClientOnly>
   </div>
+</template>
+</NuxtLayout>
 </template>
 
 <script setup>
