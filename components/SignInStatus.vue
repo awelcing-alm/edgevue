@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const isAuthenticated = ref(false);
@@ -49,13 +49,22 @@ async function signOut() {
       return;
     }
 
-    // Update the authentication status
-    isAuthenticated.value = false;
     console.log('User logged out successfully');
+
+    // Notify other parts of the app that the user has logged out
+    document.dispatchEvent(new CustomEvent('zephr.authStatusChanged'));
+
+    // Update the authentication status locally
+    isAuthenticated.value = false;
   } catch (error) {
     console.error('Error during logout:', error);
   }
 }
+
+// Watch for `isAuthenticated` changes
+watch(isAuthenticated, (newValue) => {
+  console.log('Auth status changed:', newValue);
+});
 
 onMounted(() => {
   if (typeof window === 'undefined') return;
@@ -65,6 +74,9 @@ onMounted(() => {
 
   // Update status dynamically when Zephr decisions finish
   document.addEventListener('zephr.browserDecisionsFinished', checkAuthStatus);
+
+  // Listen for global auth status changes (e.g., after logout)
+  document.addEventListener('zephr.authStatusChanged', checkAuthStatus);
 });
 </script>
 
