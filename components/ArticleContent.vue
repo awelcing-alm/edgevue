@@ -1,24 +1,13 @@
 <template>
   <ClientOnly>
-    <article id="zephr-article-content" class="article-wrapper">
+    <article id="zephr-article-content" class="article-wrapper prose prose-emerald max-w-none">
       <template v-if="!isLoading">
         <p v-if="isBlocked" class="text-red-600 text-center">
           This content is restricted. Please sign in to access.
         </p>
-        <ContentRenderer v-else :value="doc.body">
-          <template #default="{ value }">
-            <div v-for="(node, index) in value.children" :key="index" class="mb-4">
-              <component :is="node.tag" v-bind="node.props">
-                <template v-for="(child, idx) in node.children || []" :key="idx">
-                  <span v-if="child.type === 'text'">{{ child.value }}</span>
-                  <component v-else :is="child.tag" v-bind="child.props">
-                    <template v-for="(innerChild, i) in child.children || []" :key="i">
-                      <span v-if="innerChild.type === 'text'">{{ innerChild.value }}</span>
-                    </template>
-                  </component>
-                </template>
-              </component>
-            </div>
+        <ContentRenderer v-else :value="doc">
+          <template #empty>
+            <p>No content found.</p>
           </template>
         </ContentRenderer>
       </template>
@@ -27,7 +16,7 @@
   </ClientOnly>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue';
 import { useAuth } from '~/composables/useAuth';
 
@@ -42,16 +31,8 @@ defineProps({
   },
 });
 
-interface ZephrDecision {
-  outcomes?: Record<string, { outcomeLabel: string }>;
-  featureResults?: Record<string, string>;
-  accessDetails?: {
-    authenticated?: boolean;
-  };
-}
-
 function handleZephrDecision() {
-  const decisionData = (window.Zephr || {}) as ZephrDecision;
+  const decisionData = window.Zephr || {};
   const featureResults = decisionData.featureResults || {};
   const accessDetails = decisionData.accessDetails || {};
 
@@ -64,13 +45,7 @@ function handleZephrDecision() {
   }
 
   const featureOutcome = featureResults['edge-integration'];
-
-  if (featureOutcome && featureOutcome.includes('leave_pristine')) {
-    isBlocked.value = false;
-  } else {
-    isBlocked.value = true;
-  }
-
+  isBlocked.value = !(featureOutcome && featureOutcome.includes('leave_pristine'));
   isLoading.value = false;
 }
 
@@ -92,105 +67,78 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .article-wrapper {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 2rem;
-  background-color: #ffffff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  @apply bg-white p-8 rounded-lg shadow-lg;
 }
 
-.prose h1,
-.prose h2,
-.prose h3 {
-  color: #3b7973; /* Dark teal for headings */
-  font-weight: 700;
-  margin-bottom: 1rem;
+/* Enhanced Typography */
+.prose {
+  @apply text-gray-800;
 }
 
 .prose h1 {
-  font-size: 2.5rem;
-  text-align: center;
+  @apply text-4xl font-bold text-emerald-900 mb-8;
 }
 
 .prose h2 {
-  font-size: 2rem;
-  margin-top: 1.5rem;
+  @apply text-2xl font-bold text-emerald-800 mt-8 mb-4;
 }
 
 .prose h3 {
-  font-size: 1.75rem;
+  @apply text-xl font-semibold text-emerald-700 mt-6 mb-3;
 }
 
 .prose p {
-  color: #4a5568; /* Neutral dark gray */
-  font-size: 1.125rem;
-  line-height: 1.8;
-  margin-bottom: 1.25rem;
+  @apply text-lg leading-relaxed mb-4;
 }
 
 .prose a {
-  color: #3182ce; /* Blue for links */
-  text-decoration: underline;
-}
-
-.prose a:hover {
-  color: #2b6cb0;
+  @apply text-emerald-600 hover:text-emerald-700 underline;
 }
 
 .prose ul {
-  list-style-type: disc; /* Restore normal bullet points */
-  padding-left: 1.5rem; /* Add some padding for indentation */
+  @apply list-disc pl-6 mb-4;
 }
 
 .prose ol {
-  list-style-type: decimal; /* Use numbers for ordered lists */
-  padding-left: 1.5rem;
+  @apply list-decimal pl-6 mb-4;
 }
 
 .prose li {
-  margin-bottom: 0.5rem; /* Spacing between list items */
-  line-height: 1.6;
-}
-
-.prose strong {
-  color: #2d3748; /* Bold dark text */
-}
-
-.prose em {
-  font-style: italic;
-  color: #6b7280;
-}
-
-.prose img {
-  max-width: 100%;
-  margin: 1.5rem 0;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  @apply mb-2;
 }
 
 .prose blockquote {
-  border-left: 4px solid #2c7a7b; /* Teal border */
-  padding-left: 1rem;
-  background-color: #f0fff4; /* Light green background */
-  font-style: italic;
-  margin: 1.5rem 0;
+  @apply border-l-4 border-emerald-500 pl-4 italic my-4 text-gray-700;
 }
 
-.prose hr {
-  margin: 2rem 0;
-  border: none;
-  border-top: 2px solid #e2e8f0; /* Light gray horizontal line */
+.prose code {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm;
 }
 
-.code-block {
-  background-color: #f7fafc;
-  padding: 1rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-family: "Source Code Pro", monospace;
-  font-size: 0.95rem;
-  line-height: 1.6;
+.prose pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md my-6;
+}
+
+.prose table {
+  @apply w-full border-collapse my-6;
+}
+
+.prose th,
+.prose td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.prose th {
+  @apply bg-gray-100 font-semibold;
+}
+
+.loading-placeholder {
+  @apply text-center text-gray-500 animate-pulse;
 }
 </style>
