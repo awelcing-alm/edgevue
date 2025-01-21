@@ -69,24 +69,21 @@ const consentCookie = useCookie('cookie_consent', {
 const analyticsCookie = useCookie('analytics_enabled', {
   maxAge: 60 * 60 * 24 * 365,
   path: '/',
+  default: () => 'true', // Set analytics enabled by default
 });
 
 const functionalCookie = useCookie('functional_enabled', {
   maxAge: 60 * 60 * 24 * 365,
   path: '/',
+  default: () => 'true', // Set functional enabled by default
 });
 
 onMounted(() => {
   // Show banner if consent cookie is not set
   if (!consentCookie.value) {
     showBanner.value = true;
-  }
-
-  // Set default values for cookies if not already set
-  if (!analyticsCookie.value) {
+    // Set default values for new visitors
     analyticsCookie.value = 'true';
-  }
-  if (!functionalCookie.value) {
     functionalCookie.value = 'true';
   }
 });
@@ -96,7 +93,6 @@ function acceptAll() {
   functionalCookie.value = 'true';
   consentCookie.value = 'accepted';
   showBanner.value = false;
-  window.location.reload(); // Reload to enable analytics
 }
 
 function openSettings() {
