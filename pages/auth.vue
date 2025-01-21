@@ -15,16 +15,43 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '~/composables/useAuth';
 
 const router = useRouter();
 const auth = useAuth();
 const loadingForm = ref(true);
+let redirectAttempts = 0;
+const maxRedirectAttempts = 3;
+const redirectDelay = 500; // ms
+
+// Function to check auth and redirect
+function checkAuthAndRedirect() {
+  if (redirectAttempts >= maxRedirectAttempts) return;
+  
+  const accessDetails = window.Zephr?.accessDetails;
+  if (accessDetails?.authenticated) {
+    console.log('%c[Auth] User authenticated, redirecting...', 'color: #10b981;');
+    router.push('/');
+  } else {
+    redirectAttempts++;
+    if (redirectAttempts < maxRedirectAttempts) {
+      setTimeout(checkAuthAndRedirect, redirectDelay);
+    }
+  }
+}
+
+// Watch for auth state changes
+watch(() => auth.user?.jwt, (newJwt) => {
+  if (newJwt) {
+    console.log('%c[Auth] JWT detected, initiating redirect...', 'color: #10b981;');
+    checkAuthAndRedirect();
+  }
+});
 
 const formSuccessListener = () => {
-  console.log('%c[Zephr] Form submission successful! Redirecting to homepage...', 'color: #10b981;');
+  console.log('%c[Auth] Form submission successful!', 'color: #10b981;');
   
   // Extract JWT and update auth state
   const jwtToken = document.cookie
@@ -34,16 +61,31 @@ const formSuccessListener = () => {
 
   if (jwtToken) {
     auth.login('User', 'user@example.com', jwtToken);
+    // Force redirect after short delay
+    setTimeout(() => {
+      if (window.location.pathname === '/auth') {
+        console.log('%c[Auth] Forcing redirect to homepage...', 'color: #10b981;');
+        window.location.href = '/';
+      }
+    }, 1000);
   }
-  
-  // Redirect to homepage
-  router.push('/');
+};
+
+// Additional check for existing authentication
+const existingAuthCheck = () => {
+  if (auth.user?.jwt || window.Zephr?.accessDetails?.authenticated) {
+    console.log('%c[Auth] Existing authentication detected, redirecting...', 'color: #10b981;');
+    router.push('/');
+  }
 };
 
 onMounted(() => {
   if (typeof window === 'undefined') return;
 
-  console.log('%c[Zephr] Mounting form...', 'color: #4ade80; font-weight: bold;');
+  // Check for existing auth immediately
+  existingAuthCheck();
+
+  console.log('%c[Auth] Mounting form...', 'color: #4ade80; font-weight: bold;');
 
   if (window.zephrBrowser?.run) {
     window.zephrBrowser.run({
@@ -53,16 +95,18 @@ onMounted(() => {
 
     document.addEventListener('zephr.formSuccess', formSuccessListener);
     document.addEventListener('zephr.formRendered', () => {
-      console.log('%c[Zephr] Form rendered successfully.', 'color: #10b981;');
+      console.log('%c[Auth] Form rendered successfully.', 'color: #10b981;');
       loadingForm.value = false;
     });
+    document.addEventListener('zephr.browserDecisionsFinished', checkAuthAndRedirect);
   } else {
-    console.warn('%c[Zephr] Zephr script not available.', 'color: #f87171;');
+    console.warn('%c[Auth] Zephr script not available.', 'color: #f87171;');
   }
 });
 
 onUnmounted(() => {
   document.removeEventListener('zephr.formSuccess', formSuccessListener);
+  document.removeEventListener('zephr.browserDecisionsFinished', checkAuthAndRedirect);
 });
 </script>
 
