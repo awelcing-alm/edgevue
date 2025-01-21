@@ -75,7 +75,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import { useAuth } from '~/composables/useAuth';
   import { useRouter } from 'vue-router';
   import type { ComponentPublicInstance } from 'vue';
@@ -88,12 +88,12 @@
   const router = useRouter();
   const cookieModal = ref<CookieModalInstance | null>(null);
   
-  // Redirect if not authenticated
-  onMounted(() => {
-    if (!auth.user?.jwt) {
+  // Watch for auth state changes
+  watch(() => auth.user, (newUser) => {
+    if (!newUser) {
       router.push('/auth');
     }
-  });
+  }, { immediate: true });
   
   function openCookieSettings() {
     cookieModal.value?.openManageModal();
