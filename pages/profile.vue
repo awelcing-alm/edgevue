@@ -75,7 +75,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted, watch } from 'vue';
+  import { ref } from 'vue';
   import { useAuth } from '~/composables/useAuth';
   import { useRouter } from 'vue-router';
   import type { ComponentPublicInstance } from 'vue';
@@ -88,12 +88,15 @@
   const router = useRouter();
   const cookieModal = ref<CookieModalInstance | null>(null);
   
-  // Watch for auth state changes
-  watch(() => auth.user, (newUser) => {
-    if (!newUser) {
-      router.push('/auth');
-    }
-  }, { immediate: true });
+  // Define middleware using definePageMeta with array syntax
+  definePageMeta({
+    middleware: [() => {
+      const auth = useAuth();
+      if (!auth.user?.jwt) {
+        return navigateTo('/auth');
+      }
+    }]
+  });
   
   function openCookieSettings() {
     cookieModal.value?.openManageModal();

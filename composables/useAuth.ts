@@ -17,6 +17,7 @@ interface User {
 export const useAuth = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const authToken = useCookie('auth_token');
+  const isInitialized = ref(false);
 
   // Function to parse Zephr entitlements
   function parseZephrEntitlements(): UserEntitlements {
@@ -71,8 +72,17 @@ export const useAuth = defineStore('auth', () => {
     );
   };
 
-  if (process.client) {
-    onMounted(() => {
+  // Initialize auth state
+  const initialize = () => {
+    if (isInitialized.value) return;
+    
+    if (process.client) {
+      // Rehydrate user state if the cookie exists
+      if (authToken.value) {
+        console.log('Existing JWT detected—setting user as authenticated.');
+        login('Explorer', 'unknown@example.com', authToken.value);
+      }
+
       // Listen for Zephr form success
       document.addEventListener('zephr.formSuccess', () => {
         console.log('Zephr form submitted successfully.');
@@ -85,20 +95,20 @@ export const useAuth = defineStore('auth', () => {
       document.addEventListener('zephr.browserDecisionsFinished', () => {
         updateEntitlements();
       });
+    }
 
-      // Rehydrate user state if the cookie exists
-      if (authToken.value) {
-        console.log('Existing JWT detected—setting user as authenticated.');
-        login('Explorer', 'unknown@example.com', authToken.value);
-      }
-    });
-  }
+    isInitialized.value = true;
+  };
+
+  // Initialize on store creation
+  initialize();
 
   return { 
     user, 
     login, 
     logout,
     hasAccess,
-    updateEntitlements
+    updateEntitlements,
+    initialize
   };
 });
