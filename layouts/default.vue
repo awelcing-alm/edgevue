@@ -17,6 +17,9 @@
 
     <!-- Cookie Management Modal -->
     <ManageCookies ref="cookieModal" />
+    
+    <!-- Cookie Consent Banner -->
+    <CookieConsent />
   </div>
 </template>
 
